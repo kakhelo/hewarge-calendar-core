@@ -1,0 +1,3 @@
+import { JalaliCalendar } from '../jalali/JalaliCalendar.js';
+import { KurdishConfig } from './KurdishConfig.js';
+export const KurdishCalendar={id:'kurdish',name:'Kurdish',aliases:KurdishConfig.aliases,months:KurdishConfig.months,weekdays:KurdishConfig.weekdays,isLeapYear(y){return JalaliCalendar.isLeapYear(y-KurdishConfig.yearOffset);},daysInMonth(y,m){return JalaliCalendar.daysInMonth(y-KurdishConfig.yearOffset,m);},isValidDate(y,m,d){return JalaliCalendar.isValidDate(y-KurdishConfig.yearOffset,m,d);},toJdn(y,m,d){return JalaliCalendar.toJdn(y-KurdishConfig.yearOffset,m,d);},fromJdn(jdn){const x=JalaliCalendar.fromJdn(jdn);return {year:x.year+KurdishConfig.yearOffset,month:x.month,day:x.day};}};

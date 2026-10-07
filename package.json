@@ -1,0 +1,47 @@
+{
+  "name": "@hewarge/calendar-core",
+  "version": "1.0.0",
+  "description": "Hewarge multi-calendar core with Gregorian database-safe output and a framework-free modal date-picker API.",
+  "type": "module",
+  "main": "./src/index.js",
+  "module": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js"
+    },
+    "./picker": {
+      "types": "./src/picker/index.d.ts",
+      "import": "./src/picker/index.js"
+    },
+    "./picker/css": "./src/picker/hewarge-date-picker.css"
+  },
+  "files": [
+    "src",
+    "ui",
+    "docs",
+    "examples",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "dev": "node ./ui/server.mjs"
+  },
+  "keywords": [
+    "calendar",
+    "kurdish",
+    "hewarge",
+    "jalali",
+    "persian-calendar",
+    "date-picker",
+    "jdn"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ku" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07130d">
+<meta name="description" content="هەوارگە — Kurdish-first, multi-calendar Date Picker API demo">
+<title>هەوارگە — Calendar & Date Picker</title>
+<link rel="stylesheet" href="demo/style.css">
+</head>
+<body>
+<div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+<main class="shell">
+<header class="hero">
+  <div class="brand-row"><div class="brand-mark">ه</div><div><div class="eyebrow">HEWARGE CALENDAR CORE <span>v1.0.0</span></div><div class="brand">هەوارگە</div></div></div>
+  <button id="theme" class="icon-btn" aria-label="گۆڕینی ڕووناکی">◐</button>
+  <div class="hero-copy"><div class="pill">Vanilla JS · Zero Runtime Dependencies</div><h1>بەروار، بە شێوەیەکی <em>کوردی</em> و زیرەک.</h1><p>دیت پیکەرێکی پڕۆفیشناڵ بۆ کوردی، هەوری، زایینی و هجری؛ بە نمایشێکی جیاواز بۆ بەکارهێنەر و بەرواری زایینیی پاک بۆ فرۆنت‌ئێند و بنکەدراوە.</p></div>
+</header>
+<section class="demo-grid">
+  <article class="showcase card"><div class="card-head"><div><span class="kicker">LIVE DATE PICKER</span><h2>هەڵبژاردنی بەروار</h2></div><span class="status"><i></i> Live</span></div>
+    <label for="main-date">بەرواری کوردی</label>
+    <div class="input-wrap"><span class="calendar-icon">◫</span><input id="main-date" data-hewarge-datepicker name="event_date_display" data-calendar="kurdish" data-format="DD/MM/YYYY" data-storage-name="event_date" placeholder="بەروار هەڵبژێرە" autocomplete="off"></div>
+    <p class="hint">لەسەر مۆبایل: Wheel Picker · لەسەر کۆمپیوتەر: Calendar + Month/Year Selector</p>
+    <div class="quick-row"><button data-set-calendar="kurdish">کوردی</button><button data-set-calendar="jalali">هەوری</button><button data-set-calendar="gregorian">زایینی</button><button data-set-calendar="hijri">هجری</button></div>
+  </article>
+  <article class="data card"><div class="card-head"><div><span class="kicker">CANONICAL VALUE</span><h2>بەرواری بنکەدراوە</h2></div><span class="lock">DB</span></div>
+    <div class="canonical"><small>Gregorian ISO</small><strong id="gregorian">—</strong></div>
+    <div class="mini-grid"><div><small>Calendar</small><b id="calendar-name">—</b></div><div><small>Display</small><b id="display-value">—</b></div></div>
+    <div class="event-box"><div class="box-title">event.detail</div><pre id="event-json">—</pre></div>
+  </article>
+</section>
+<section class="features"><div class="feature"><b>01</b><strong>نمایش جیاواز</strong><span>ئەوەی بەکارهێنەر دەبینێت لەگەڵ ئەوەی بۆ DB دەنێردرێت جیاوازە.</span></div><div class="feature"><b>02</b><strong>Month / Year Selector</strong><span>لە toolbar ـەکەدا مانگ و ساڵ کلیک بکە و لە selector ـی scroll ـدا هەڵیبژێرە.</span></div><div class="feature"><b>03</b><strong>Mobile Wheel</strong><span>لەسەر مۆبایل ساڵ، مانگ و ڕۆژ بە wheel ـی touch-friendly هەڵدەبژێریت.</span></div></section>
+<section class="code card"><div class="card-head"><div><span class="kicker">API</span><h2>بەکارهێنان</h2></div><button id="copy" class="copy">کۆپی</button></div><pre><code>createDatePicker(input, {
+  calendar: 'kurdish',
+  format: 'DD/MM/YYYY',
+  storageName: 'event_date'
+});
+
+input.addEventListener('hewarge:change', (event) =&gt; {
+  console.log(event.detail.value);        // 16/06/2726
+  console.log(event.detail.storageValue); // 2026-09-07
+});</code></pre></section>
+<footer><span>هەوارگە · Calendar Core</span><span>MIT License · Framework Free</span></footer>
+</main>
+<script type="module" src="demo/app.js"></script>
+</body></html>
