@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # @hewarge/calendar-core
 
 A framework-free multi-calendar date engine with an embeddable RTL modal date picker.
@@ -409,3 +410,7 @@ result.dayMonthYearPadded
 The conversion helpers also accept a JavaScript `Date` or `{ year, month, day }` Gregorian object.
 
 > Hijri conversion in this package is the implemented arithmetic/civil Hijri algorithm. It should not be treated as a local moon-sighting declaration.
+=======
+# hewarge-calendar-core
+A framework-free multi-calendar core and date picker for Kurdish, Jalali, Gregorian and Hijri calendars.
+>>>>>>> ba551d3a3357ca193273709ea96d12a2393983e0
