@@ -1,6 +1,6 @@
 {
   "name": "@hewarge/calendar-core",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Hewarge multi-calendar core with Gregorian database-safe output and a framework-free modal date-picker API.",
   "type": "module",
   "main": "./src/index.js",
