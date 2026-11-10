@@ -380,6 +380,9 @@ export class HewargeDatePicker {
       </div>
       <div class="hw-week">${Array.from({length:7},(_,i)=>`<span>${esc(WEEKDAYS[(i+this.options.weekStart)%7].slice(0,2))}</span>`).join('')}</div>
       <div class="hw-days">${cells.join('')}</div>
+      <div class="hw-footer">
+        <div class="hw-actions">${this.options.todayButton?'<button type="button" class="hw-today" data-action="today">ئەمڕۆ</button>':''}<button type="button" class="hw-confirm" data-action="confirm-wheel">تەواو</button></div>
+      </div>
       `;
     this.bindDialog();
 
@@ -425,8 +428,7 @@ export class HewargeDatePicker {
       </div>
       <div class="hw-message" role="alert" hidden></div>
       <div class="hw-footer hw-wheel-footer">
-        <div class="hw-calendar-switch">${CalendarRegistry.list().map(id=>`<button type="button" class="hw-cal ${id===this.calendar?'active':''}" data-calendar="${id}">${esc(LABELS[id]||id)}</button>`).join('')}</div>
-        <div class="hw-actions">${this.options.clearable?'<button type="button" class="hw-text" data-action="clear">پاککردن</button>':''}${this.options.todayButton?'<button type="button" class="hw-today" data-action="today">ئەمڕۆ</button>':''}<button type="button" class="hw-confirm" data-action="confirm-wheel">تەواو</button></div>
+        <div class="hw-actions">${this.options.todayButton?'<button type="button" class="hw-today" data-action="today">ئەمڕۆ</button>':''}<button type="button" class="hw-confirm" data-action="confirm-wheel">تەواو</button></div>
       </div>`;
     this.bindWheelDialog(selected);
   }

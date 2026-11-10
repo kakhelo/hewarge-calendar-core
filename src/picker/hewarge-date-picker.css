@@ -35,7 +35,7 @@
 
 .hw-modal-top,.hw-toolbar,.hw-footer,.hw-actions,.hw-calendar-switch {
     display: flex;
-    align-items: center
+    align-items: stretch;
 }
 
 .hw-modal-top {
@@ -233,12 +233,12 @@
 }
 
 .hw-footer {
-    justify-content: space-between;
+    display: flex;
+    justify-content: center;
     gap: 10px;
     margin-top: 14px;
     padding-top: 12px;
     border-top: 1px solid #e4e9e5;
-    flex-wrap: wrap
 }
 
 .hw-calendar-switch {
@@ -265,7 +265,10 @@
 }
 
 .hw-actions {
-    gap: 5px
+    display: flex;
+    width: 100%;
+    gap: 5px;
+    justify-content: center;
 }
 
 .hw-text {
@@ -274,6 +277,7 @@
 }
 
 .hw-today {
+    width: 100%;
     background: #17221b;
     color: white
 }
@@ -497,11 +501,11 @@
 }
 
 .hw-wheel-footer {
-    display: none;
-    align-items: flex-end
+    align-items: stretch;
 }
 
 .hw-confirm {
+    width: 100%;
     border: 0;
     cursor: pointer;
     border-radius: 11px;
@@ -569,8 +573,7 @@
     .hw-wheel-footer .hw-actions {
         width: 100%;
         justify-content: stretch;
-        display: grid;
-        grid-template-columns: auto auto 1fr
+        display: flex;
     }
 
     .hw-wheel-footer .hw-actions>* {
