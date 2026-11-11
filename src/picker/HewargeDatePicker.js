@@ -702,6 +702,7 @@ export class HewargeDatePicker {
   bindDialog() {
     this.dialog.querySelectorAll('[data-day]:not([disabled])').forEach(b => b.addEventListener('click', () => this.select(Number(b.dataset.day))));
     this.dialog.querySelector('[data-action="close"]').addEventListener('click', () => this.close());
+    this.dialog.querySelector('[data-action="confirm-wheel"]')?.addEventListener('click', () => this.close());
     this.backdrop.addEventListener('click', () => this.close());
     this.dialog.querySelector('[data-action="prev"]').addEventListener('click', () => { if (!this.canMoveMonth(-1)) return; this.view=shiftMonth(this.calendar,this.view.year,this.view.month,-1); this.renderDialog(); });
     this.dialog.querySelector('[data-action="next"]').addEventListener('click', () => { if (!this.canMoveMonth(1)) return; this.view=shiftMonth(this.calendar,this.view.year,this.view.month,1); this.renderDialog(); });
