@@ -5,7 +5,9 @@
 <meta name="theme-color" content="#07130d">
 <meta name="description" content="هەوارگە — Kurdish-first, multi-calendar Date Picker API demo">
 <title>هەوارگە — Calendar & Date Picker</title>
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="/ui/css/style.css">
+<link rel="stylesheet" href="/ui/css/font.css">
+<link rel="stylesheet" href="/ui/css/timestamp-demo.css">
 </head>
 <body>
 <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
@@ -28,6 +30,42 @@
     <div class="event-box"><div class="box-title">event.detail</div><pre id="event-json">—</pre></div>
   </article>
 </section>
+<section class="timestamp-demo card" aria-labelledby="timestamp-title">
+  <div class="card-head"><div><span class="kicker">TIMESTAMP CONVERTER · LIVE TEST</span><h2 id="timestamp-title">گۆڕینی بەروار و کات ↔ Timestamp</h2></div><span class="status"><i></i> Live</span></div>
+  <p class="timestamp-intro">چرکە، میلیچرکە و ناوچەی کاتی دیاری بکە؛ هەردوو ئاراستەکە لێرەدا بە شێوەی ڕاستەوخۆ تاقی دەکرێنەوە.</p>
+  <div class="timestamp-settings">
+    <label>یەکەی Timestamp<select id="timestamp-unit"><option value="milliseconds">Milliseconds (ms)</option><option value="seconds">Seconds (s)</option></select></label>
+    <label>ناوچەی کاتی (IANA)<input id="timestamp-zone" value="America/New_York" dir="ltr" autocomplete="off"></label>
+  </div>
+  <div class="timestamp-grid">
+    <article class="timestamp-panel">
+      <h3>Timestamp ← بەروار و کات</h3>
+      <label for="timestamp-input">Timestamp</label>
+      <input id="timestamp-input" type="number" step="any" dir="ltr">
+      <button id="timestamp-decode" type="button" class="timestamp-button">گۆڕین بۆ بەروار</button>
+      <div class="timestamp-result"><small>ئەنجام</small><strong id="timestamp-result-date">—</strong><span id="timestamp-result-time">—</span><pre id="timestamp-result-json">—</pre></div>
+    </article>
+    <article class="timestamp-panel">
+      <h3>بەروار و کات → Timestamp</h3>
+      <div class="timestamp-fields">
+        <label>ساڵ<input id="datetime-year" type="number" value="2726"></label>
+        <label>مانگ<input id="datetime-month" type="number" min="1" max="12" value="6"></label>
+        <label>ڕۆژ<input id="datetime-day" type="number" min="1" max="31" value="16"></label>
+      </div>
+      <div class="timestamp-fields timestamp-time-fields">
+        <label>کاتژمێر<input id="datetime-hour" type="number" min="0" max="23" value="12"></label>
+        <label>خولەک<input id="datetime-minute" type="number" min="0" max="59" value="34"></label>
+        <label>چرکە<input id="datetime-second" type="number" min="0" max="59" value="56"></label>
+        <label>میلیچرکە<input id="datetime-millisecond" type="number" min="0" max="999" value="789"></label>
+      </div>
+      <label for="datetime-calendar">جۆری ساڵژمێر</label>
+      <select id="datetime-calendar"><option value="kurdish" selected>کوردی</option><option value="gregorian">زایینی</option><option value="jalali">هەوری</option><option value="hijri">هجری</option></select>
+      <button id="timestamp-encode" type="button" class="timestamp-button">گۆڕین بۆ Timestamp</button>
+      <div class="timestamp-result"><small>ئەنجام</small><strong id="datetime-result-timestamp">—</strong><span id="datetime-result-iso">—</span><p id="timestamp-test-result" role="status">تاقیکردنەوەی گەڕانەوە ئامادەیە.</p></div>
+    </article>
+  </div>
+  <div class="timestamp-actions"><button id="timestamp-test" type="button" class="timestamp-button secondary">تاقیکردنەوەی گەڕانەوە</button><span>بەروار → Timestamp → بەروار</span></div>
+</section>
 <section class="features"><div class="feature"><b>01</b><strong>نمایش جیاواز</strong><span>ئەوەی بەکارهێنەر دەبینێت لەگەڵ ئەوەی بۆ DB دەنێردرێت جیاوازە.</span></div><div class="feature"><b>02</b><strong>Month / Year Selector</strong><span>لە toolbar ـەکەدا مانگ و ساڵ کلیک بکە و لە selector ـی scroll ـدا هەڵیبژێرە.</span></div><div class="feature"><b>03</b><strong>Mobile Wheel</strong><span>لەسەر مۆبایل ساڵ، مانگ و ڕۆژ بە wheel ـی touch-friendly هەڵدەبژێریت.</span></div></section>
 <section class="code card"><div class="card-head"><div><span class="kicker">API</span><h2>بەکارهێنان</h2></div><button id="copy" class="copy">کۆپی</button></div><pre><code>createDatePicker(input, {
   calendar: 'kurdish',
@@ -41,5 +79,5 @@ input.addEventListener('hewarge:change', (event) =&gt; {
 });</code></pre></section>
 <footer><span>هەوارگە · Calendar Core</span><span>MIT License · Framework Free</span></footer>
 </main>
-<script type="module" src="js/app.js"></script>
+<script type="module" src="/ui/js/app.js"></script>
 </body></html>

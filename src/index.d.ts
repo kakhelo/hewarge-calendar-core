@@ -2,6 +2,14 @@ export type CalendarId = 'gregorian' | 'jalali' | 'kurdish' | 'hijri' | string;
 export type DateObject = { year:number; month:number; day:number };
 export type CalendarDateObject = DateObject & { calendar:string };
 export type DateAmount = { years?:number; months?:number; weeks?:number; days?:number };
+export type TimestampUnit = 'milliseconds' | 'millisecond' | 'ms' | 'seconds' | 'second' | 's';
+export type TimestampOptions = { unit?:TimestampUnit; timeZone?:string };
+export type TimestampToDateTimeOptions = TimestampOptions & { calendar?:CalendarId };
+export type DateTimeInput = DateObject & { calendar?:CalendarId; hour?:number; minute?:number; second?:number; millisecond?:number };
+export type DateTimeResult = CalendarDateObject & {
+  hour:number; minute:number; second:number; millisecond:number; timeZone:string;
+  date:DateValue; epochMilliseconds:number; timestamp:number; unit:'seconds'|'milliseconds';
+};
 export declare class DateValue {
   readonly calendar:string; readonly year:number; readonly month:number; readonly day:number;
   readonly daysInMonth:number; readonly dayOfYear:number; readonly dayOfWeek:number; readonly isLeapYear:boolean;
@@ -42,3 +50,5 @@ export declare function formatGregorianDate(input: string | Date | {year:number;
 export declare function gregorianToKurdish(input: string | Date | {year:number;month:number;day:number}, format?: string): ConvertedDate;
 export declare function gregorianToJalali(input: string | Date | {year:number;month:number;day:number}, format?: string): ConvertedDate;
 export declare function gregorianToHijri(input: string | Date | {year:number;month:number;day:number}, format?: string): ConvertedDate;
+export declare function timestampToDateTime(timestamp:number, options?:TimestampToDateTimeOptions): DateTimeResult;
+export declare function dateTimeToTimestamp(value:DateValue | DateTimeInput, options?:TimestampOptions): number;

@@ -129,6 +129,26 @@ CalendarRegistry.all();
 
 The registry is the extension point for additional calendar engines.
 
+## Timestamp and time-zone conversion
+
+The timestamp helpers use milliseconds by default. Set `unit: 'seconds'` (or `'s'`) for Unix seconds; `'milliseconds'` (or `'ms'`) selects milliseconds. `timeZone` accepts an IANA time-zone name and defaults to `UTC`.
+
+```js
+import { dateTimeToTimestamp, timestampToDateTime } from '@hewarge/calendar-core';
+
+const timestamp = dateTimeToTimestamp({
+  calendar: 'kurdish', year: 2726, month: 6, day: 16,
+  hour: 12, minute: 34, second: 56, millisecond: 789
+}, { unit: 'milliseconds', timeZone: 'America/New_York' });
+
+const localDateTime = timestampToDateTime(timestamp, {
+  unit: 'milliseconds', timeZone: 'America/New_York', calendar: 'kurdish'
+});
+// localDateTime.date is a DateValue; localDateTime includes hour/minute/second/millisecond.
+```
+
+If a local time does not exist due to a daylight-saving transition, `dateTimeToTimestamp` throws a `RangeError`. For an ambiguous repeated local time it chooses the earlier matching instant.
+
 ## Errors
 
 The package exposes:

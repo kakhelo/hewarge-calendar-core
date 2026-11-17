@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # @hewarge/calendar-core
 
 A framework-free multi-calendar date engine with an embeddable RTL modal date picker.
@@ -263,6 +262,38 @@ date.isLeapYear;
 date.toJdn();
 ```
 
+### Timestamp and time-zone conversion
+
+Convert between Unix timestamps and calendar date-times, including seconds, milliseconds, and an IANA time zone. Timestamp values use milliseconds by default; set `unit` to `'seconds'` (or `'s'`) or `'milliseconds'` (or `'ms'`). The time zone defaults to `UTC`.
+
+```js
+import { dateTimeToTimestamp, timestampToDateTime } from '@hewarge/calendar-core';
+
+const timestamp = dateTimeToTimestamp({
+  calendar: 'kurdish',
+  year: 2726, month: 6, day: 16,
+  hour: 12, minute: 34, second: 56, millisecond: 789
+}, {
+  unit: 'milliseconds',
+  timeZone: 'America/New_York'
+});
+
+const dateTime = timestampToDateTime(timestamp, {
+  unit: 'milliseconds',
+  timeZone: 'America/New_York',
+  calendar: 'kurdish'
+});
+
+console.log(dateTime.date.format('YYYY/MM/DD'));
+// 2726/06/16
+console.log(dateTime.hour, dateTime.minute, dateTime.second, dateTime.millisecond);
+// 12 34 56 789
+```
+
+`dateTimeToTimestamp()` accepts a `DateValue` or an object containing `year`, `month`, `day`, optional `calendar`, and optional time fields (`hour`, `minute`, `second`, `millisecond`). `timestampToDateTime()` returns the converted calendar fields, time fields, selected `timeZone`, and the corresponding `DateValue` in its `date` property. A local time skipped by a daylight-saving transition throws a `RangeError`; for an ambiguous repeated time, the earlier instant is selected.
+
+The interactive demo at `npm run dev` also includes a timestamp conversion panel and a live round-trip test.
+
 ## Calendar IDs
 
 ```text
@@ -410,7 +441,3 @@ result.dayMonthYearPadded
 The conversion helpers also accept a JavaScript `Date` or `{ year, month, day }` Gregorian object.
 
 > Hijri conversion in this package is the implemented arithmetic/civil Hijri algorithm. It should not be treated as a local moon-sighting declaration.
-=======
-# hewarge-calendar-core
-A framework-free multi-calendar core and date picker for Kurdish, Jalali, Gregorian and Hijri calendars.
->>>>>>> ba551d3a3357ca193273709ea96d12a2393983e0
