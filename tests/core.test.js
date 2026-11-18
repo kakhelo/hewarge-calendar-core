@@ -16,4 +16,14 @@ test('date operations remain immutable', () => {
   assert.deepEqual(d.toKurdish(), {year:2726,month:6,day:16});
 });
 
-test('registry exposes supported calendars', () => assert.deepEqual(CalendarRegistry.list(), ['gregorian','jalali','kurdish','hijri']));
+test('Kurdish Zayni shares Gregorian dates while retaining a separate calendar identity', () => {
+  const gregorian = HewargeDate.fromGregorian(2026, 9, 7);
+  const zayni = gregorian.convert('kurdish-zayni');
+  assert.equal(zayni.calendar, 'kurdish-zayni');
+  assert.deepEqual(zayni.toObjectDate(), {year:2026,month:9,day:7});
+  assert.deepEqual(zayni.toGregorian(), {year:2026,month:9,day:7});
+  assert.deepEqual(HewargeDate.fromKurdishZayni(2026, 9, 7).toJdn(), gregorian.toJdn());
+  assert.deepEqual(gregorian.toKurdish(), {year:2726,month:6,day:16});
+});
+
+test('registry exposes all five supported calendars', () => assert.deepEqual(CalendarRegistry.list(), ['gregorian','jalali','kurdish','kurdish-zayni','hijri']));

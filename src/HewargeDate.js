@@ -6,6 +6,7 @@ export const HewargeDate = {
   fromGregorian: (year, month, day) => createDate('gregorian', year, month, day),
   fromJalali: (year, month, day) => createDate('jalali', year, month, day),
   fromKurdish: (year, month, day) => createDate('kurdish', year, month, day),
+  fromKurdishZayni: (year, month, day) => createDate('kurdish-zayni', year, month, day),
   fromHijri: (year, month, day) => createDate('hijri', year, month, day),
   fromObject(value) {
     if (!value || typeof value !== 'object') throw new TypeError('Expected a date object.');

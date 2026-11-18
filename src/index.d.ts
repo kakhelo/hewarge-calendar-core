@@ -1,4 +1,4 @@
-export type CalendarId = 'gregorian' | 'jalali' | 'kurdish' | 'hijri' | string;
+export type CalendarId = 'gregorian' | 'jalali' | 'kurdish' | 'kurdish-zayni' | 'hijri' | string;
 export type DateObject = { year:number; month:number; day:number };
 export type CalendarDateObject = DateObject & { calendar:string };
 export type DateAmount = { years?:number; months?:number; weeks?:number; days?:number };
@@ -14,7 +14,7 @@ export declare class DateValue {
   readonly calendar:string; readonly year:number; readonly month:number; readonly day:number;
   readonly daysInMonth:number; readonly dayOfYear:number; readonly dayOfWeek:number; readonly isLeapYear:boolean;
   toJdn():number; toObject():CalendarDateObject; toObjectDate():DateObject; toJSON():CalendarDateObject;
-  convert(calendar:CalendarId):DateValue; toGregorian():DateObject; toJalali():DateObject; toKurdish():DateObject; toHijri():DateObject;
+  convert(calendar:CalendarId):DateValue; toGregorian():DateObject; toJalali():DateObject; toKurdish():DateObject; toKurdishZayni():DateObject; toHijri():DateObject;
   with(value?:Partial<DateObject>):DateValue; add(amount?:DateAmount):DateValue; addDays(days:number):DateValue; subtract(amount?:DateAmount):DateValue;
   difference(other:DateValue, unit?:'days'|'weeks'|'months'|'years'):number;
   startOf(unit:'day'|'month'|'year'):DateValue; endOf(unit:'day'|'month'|'year'):DateValue;
@@ -24,7 +24,7 @@ export declare class DateValue {
 export declare const HewargeDate: {
   from(calendar:CalendarId,year:number,month:number,day:number):DateValue;
   fromGregorian(year:number,month:number,day:number):DateValue; fromJalali(year:number,month:number,day:number):DateValue;
-  fromKurdish(year:number,month:number,day:number):DateValue; fromHijri(year:number,month:number,day:number):DateValue;
+  fromKurdish(year:number,month:number,day:number):DateValue; fromKurdishZayni(year:number,month:number,day:number):DateValue; fromHijri(year:number,month:number,day:number):DateValue;
   fromObject(value:CalendarDateObject):DateValue; fromDate(date?:Date):DateValue; fromUTCDate(date?:Date):DateValue; today():DateValue; calendars():string[];
 };
 export declare const CalendarRegistry: { list():string[]; all():any[]; get(name:CalendarId):any; has(name:CalendarId):boolean; register(engine:any):any };
@@ -48,6 +48,7 @@ export type ConvertedDate = {
 export declare function parseGregorianDate(input: string | Date | {year:number;month:number;day:number}, format?: string): DateValue;
 export declare function formatGregorianDate(input: string | Date | {year:number;month:number;day:number}, pattern?: string): string;
 export declare function gregorianToKurdish(input: string | Date | {year:number;month:number;day:number}, format?: string): ConvertedDate;
+export declare function gregorianToKurdishZayni(input: string | Date | {year:number;month:number;day:number}, format?: string): ConvertedDate;
 export declare function gregorianToJalali(input: string | Date | {year:number;month:number;day:number}, format?: string): ConvertedDate;
 export declare function gregorianToHijri(input: string | Date | {year:number;month:number;day:number}, format?: string): ConvertedDate;
 export declare function timestampToDateTime(timestamp:number, options?:TimestampToDateTimeOptions): DateTimeResult;

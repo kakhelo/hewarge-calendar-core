@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@400;500;600;700;800&display=swap');
+
 .hewarge-picker-backdrop {
     position: fixed;
     inset: 0;
@@ -20,7 +22,7 @@
     border-radius: 26px;
     background: rgba(250,252,250,.98);
     box-shadow: 0 28px 90px rgba(18,32,23,.28);
-    font-family: system-ui,-apple-system,"Segoe UI",sans-serif;
+    font-family: "Noto Kufi Arabic",Tahoma,sans-serif;
     color: #17221b;
     opacity: 0;
     transform: translateY(-7px) scale(.985);
@@ -31,6 +33,13 @@
 .hewarge-picker-modal.hewarge-picker-open {
     opacity: 1;
     transform: none
+}
+
+.hewarge-picker-modal button,
+.hewarge-picker-modal input,
+.hewarge-picker-modal select,
+.hewarge-picker-modal textarea {
+    font-family: inherit;
 }
 
 .hw-modal-top,.hw-toolbar,.hw-footer,.hw-actions,.hw-calendar-switch {

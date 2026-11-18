@@ -6,7 +6,7 @@ Hewarge is designed to be used as a **library**, not as a standalone date-picker
 
 ## Features
 
-- Gregorian, Jalali, Kurdish and Hijri calendar support
+- Gregorian (English month names), Kurdish Zayni, legacy Kurdish, Jalali and Hijri calendar support
 - Calendar conversion through a shared JDN-based core
 - Immutable `DateValue` API
 - Date arithmetic and comparisons
@@ -134,7 +134,7 @@ createDatePicker(input, {
 | Option | Type | Default | Description |
 |---|---|---:|---|
 | `calendar` | string | `kurdish` | Calendar used by the input/picker |
-| `locale` | string | `ku` | UI locale identifier |
+| `locale` | string | `ku` | Retained for compatibility; the active calendar determines the picker language and direction |
 | `format` | string | `YYYY/MM/DD` | Input display format |
 | `weekStart` | number | `6` | First weekday index: `0`=Sunday … `6`=Saturday |
 | `closeOnSelect` | boolean | `true` | Close after selecting a day |
@@ -181,6 +181,7 @@ input.addEventListener('hewarge:change', (event) => {
   console.log(detail.gregorian);
   console.log(detail.jalali);
   console.log(detail.kurdish);
+  console.log(detail.kurdishZayni);
   console.log(detail.hijri);
 });
 ```
@@ -204,6 +205,9 @@ const date = HewargeDate.fromGregorian(2026, 9, 7);
 
 console.log(date.toKurdish());
 // { year: 2726, month: 6, day: 16 }
+
+console.log(date.convert('kurdish-zayni').toObjectDate());
+// { year: 2026, month: 9, day: 7 } — same date as Gregorian, with Kurdish month names in the picker
 
 console.log(date.toJalali());
 // { year: 1405, month: 6, day: 16 }
@@ -292,15 +296,33 @@ console.log(dateTime.hour, dateTime.minute, dateTime.second, dateTime.millisecon
 
 `dateTimeToTimestamp()` accepts a `DateValue` or an object containing `year`, `month`, `day`, optional `calendar`, and optional time fields (`hour`, `minute`, `second`, `millisecond`). `timestampToDateTime()` returns the converted calendar fields, time fields, selected `timeZone`, and the corresponding `DateValue` in its `date` property. A local time skipped by a daylight-saving transition throws a `RangeError`; for an ambiguous repeated time, the earlier instant is selected.
 
-The interactive demo at `npm run dev` also includes a timestamp conversion panel and a live round-trip test.
+The interactive demo at `npm run dev` also includes a timestamp conversion panel, a live round-trip test, and a button to verify date-time round trips for all five calendars.
 
 ## Calendar IDs
 
 ```text
 kurdish
-gregorian
+kurdish-zayni
 jalali
+gregorian
 hijri
+```
+
+## Calendar languages
+
+The picker automatically localizes its interface from the selected calendar; no separate locale setting is required:
+
+- `kurdish` and `kurdish-zayni`: Kurdish month and weekday names, controls, labels, and right-to-left layout. The legacy `kurdish` calendar retains its existing 2726-based date calculation. `kurdish-zayni` uses Gregorian date arithmetic with Kurdish month names.
+- `jalali`: Persian names and interface text with right-to-left layout.
+- `hijri`: Arabic month and weekday names and interface text with right-to-left layout.
+- `gregorian`: English month and weekday names and interface text with left-to-right layout.
+
+Localization covers picker headings, today/confirm/close buttons, previous/next month labels, month/year selectors, validation messages, weekday headings, and the bundled demo's date-input label and placeholder. Switching the calendar also switches the interface language:
+
+```js
+picker.setCalendar('jalali');    // Persian UI
+picker.setCalendar('hijri');     // Arabic UI
+picker.setCalendar('gregorian'); // English UI
 ```
 
 ## Package exports

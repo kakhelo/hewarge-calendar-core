@@ -26,7 +26,7 @@ export function parseGregorianDate(input, format = 'YYYY-MM-DD') {
   return HewargeDate.fromGregorian(value.year, value.month, value.day);
 }
 
-function result(date, calendar) {
+function result(date, calendar, calendarId = calendar) {
   const value = date[`to${calendar[0].toUpperCase()}${calendar.slice(1)}`]();
   const yearMonthDay = `${value.year}/${value.month}/${value.day}`;
   const yearMonthDayPadded = `${String(value.year).padStart(4, '0')}/${String(value.month).padStart(2, '0')}/${String(value.day).padStart(2, '0')}`;
@@ -41,12 +41,15 @@ function result(date, calendar) {
     yearMonthDayPadded,
     dayMonthYear,
     dayMonthYearPadded,
-    calendar
+    calendar: calendarId
   });
 }
 
 export function gregorianToKurdish(input, format = 'YYYY-MM-DD') {
   return result(parseGregorianDate(input, format), 'kurdish');
+}
+export function gregorianToKurdishZayni(input, format = 'YYYY-MM-DD') {
+  return result(parseGregorianDate(input, format), 'kurdishZayni', 'kurdish-zayni');
 }
 export function gregorianToJalali(input, format = 'YYYY-MM-DD') {
   return result(parseGregorianDate(input, format), 'jalali');

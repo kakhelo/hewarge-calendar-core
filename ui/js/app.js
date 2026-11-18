@@ -3,13 +3,24 @@ import { dateTimeToTimestamp, timestampToDateTime } from '../../src/index.js';
 
 const input = document.querySelector('#main-date');
 const picker = createDatePicker(input, { calendar: 'kurdish', format: 'DD/MM/YYYY', storageName: 'event_date' });
+const inputLabel = document.querySelector('#main-date-label');
 const gregorian = document.querySelector('#gregorian');
 const calendarName = document.querySelector('#calendar-name');
 const display = document.querySelector('#display-value');
 const json = document.querySelector('#event-json');
-const labels = {kurdish:'کوردی',jalali:'هەوری',gregorian:'زایینی',hijri:'هجری'};
+const labels = {kurdish:'کوردی','kurdish-zayni':'کوردی زاینی',jalali:'هەوری',gregorian:'زایینی',hijri:'هجری'};
+const inputCopy = {
+  kurdish: ['بەرواری کوردی', 'بەروار هەڵبژێرە'],
+  'kurdish-zayni': ['بەرواری کوردی زاینی', 'بەروار هەڵبژێرە'],
+  jalali: ['تاریخ شمسی', 'انتخاب تاریخ'],
+  gregorian: ['Gregorian date', 'Select a date'],
+  hijri: ['التاريخ الهجري', 'اختر التاريخ']
+};
 
 function render(detail){
+  const [label, placeholder] = inputCopy[detail.calendar] || inputCopy.kurdish;
+  inputLabel.textContent = label;
+  input.placeholder = placeholder;
   gregorian.textContent = detail.storageValue || '—';
   calendarName.textContent = labels[detail.calendar] || detail.calendar;
   display.textContent = detail.value || '—';
@@ -114,6 +125,44 @@ document.querySelector('#timestamp-test').addEventListener('click', () => {
     ? '✓ تاقیکردنەوە سەرکەوتوو بوو — هەموو خانەکان بە دروستی گەڕانەوە.'
     : '✕ گەڕانەوە لەگەڵ بەروار و کاتی سەرەتایی یەکسان نییە.';
   roundtripOutput.dataset.state = matches ? 'passed' : 'failed';
+});
+
+document.querySelector('#calendar-test').addEventListener('click', () => {
+  const time = {
+    hour: Number(document.querySelector('#datetime-hour').value),
+    minute: Number(document.querySelector('#datetime-minute').value),
+    second: Number(document.querySelector('#datetime-second').value),
+    millisecond: Number(document.querySelector('#datetime-millisecond').value)
+  };
+  const cases = [
+    { calendar: 'kurdish', year: 2726, month: 6, day: 16 },
+    { calendar: 'kurdish-zayni', year: 2026, month: 9, day: 7 },
+    { calendar: 'jalali', year: 1405, month: 6, day: 16 },
+    { calendar: 'gregorian', year: 2026, month: 9, day: 7 },
+    { calendar: 'hijri', year: 1448, month: 3, day: 24 }
+  ];
+  const fields = ['year', 'month', 'day', 'hour', 'minute', 'second', 'millisecond'];
+  const results = cases.map(expected => {
+    try {
+      const timestamp = dateTimeToTimestamp({ ...expected, ...time }, {
+        unit: timestampUnit.value,
+        timeZone: timestampZone.value
+      });
+      const actual = timestampToDateTime(timestamp, {
+        unit: timestampUnit.value,
+        timeZone: timestampZone.value,
+        calendar: expected.calendar
+      });
+      const passed = fields.every(field => actual[field] === (expected[field] ?? time[field]));
+      return { calendar: expected.calendar, passed };
+    } catch (error) {
+      return { calendar: expected.calendar, passed: false, error: error.message };
+    }
+  });
+  const passedCount = results.filter(result => result.passed).length;
+  const output = document.querySelector('#calendar-test-result');
+  output.textContent = `${passedCount}/${results.length} · ${results.map(result => `${result.passed ? '✓' : '✕'} ${labels[result.calendar] || result.calendar}${result.error ? `: ${result.error}` : ''}`).join(' · ')}`;
+  output.dataset.state = passedCount === results.length ? 'passed' : 'failed';
 });
 
 timestampInput.value = String(Date.UTC(2026, 8, 7, 16, 34, 56, 789));

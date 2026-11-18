@@ -1,13 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { HewargeDate, gregorianToKurdish, gregorianToJalali, gregorianToHijri, formatGregorianDate } from '../src/index.js';
+import { HewargeDate, gregorianToKurdish, gregorianToKurdishZayni, gregorianToJalali, gregorianToHijri, formatGregorianDate } from '../src/index.js';
 
 test('Gregorian conversion helpers return structured and joined values', () => {
   const input = '2026-09-07';
   const k = gregorianToKurdish(input);
+  const kz = gregorianToKurdishZayni(input);
   const j = gregorianToJalali(input);
   const h = gregorianToHijri(input);
   assert.deepEqual({year:k.year, month:k.month, day:k.day}, {year:2726, month:6, day:16});
+  assert.deepEqual({year:kz.year, month:kz.month, day:kz.day}, {year:2026, month:9, day:7});
+  assert.equal(kz.calendar, 'kurdish-zayni');
   assert.equal(k.dayMonthYear, '16/6/2726');
   assert.equal(k.dayMonthYearPadded, '16/06/2726');
   assert.equal(k.yearMonthDay, '2726/6/16');

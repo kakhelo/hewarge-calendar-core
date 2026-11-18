@@ -30,13 +30,19 @@ const picker = createDatePicker(document.querySelector('#date'), {
 });
 ```
 
+Supported calendars are `kurdish` (the legacy 2726-based calendar), `kurdish-zayni` (Gregorian date arithmetic with Kurdish month names), `gregorian` (Gregorian arithmetic with English month names), `jalali`, and `hijri`.
+
+The picker automatically chooses its interface language and text direction from the active calendar. Kurdish and Kurdish Zayni use Kurdish text and RTL layout; Jalali uses Persian and RTL; Hijri uses Arabic and RTL; Gregorian uses English and LTR. Month and weekday names, picker headings, today/confirm/close controls, navigation labels, month/year selector headings, validation messages, and labels/placeholders in the bundled demo follow that language. The `locale` option remains available for compatibility; calendar-based localization is automatic.
+
 ## Empty input behavior
 
 If the input is empty when opened, the picker uses today's date as its initial view. This means the user sees the current month/year immediately instead of an arbitrary month.
 
 ## Today action
 
-The built-in button is rendered as:
+The built-in Today button is localized to the selected calendar (for example, `ئەمڕۆ` for Kurdish, `امروز` for Jalali, `اليوم` for Hijri, and `Today` for Gregorian).
+
+In Kurdish mode, the button is rendered as:
 
 ```html
 <button type="button" class="hw-today" data-action="today">ئەمڕۆ</button>
@@ -162,6 +168,7 @@ picker.destroy();
   gregorian: { year, month, day },
   jalali: { year, month, day },
   kurdish: { year, month, day },
+  kurdishZayni: { year, month, day },
   hijri: { year, month, day }
 }
 ```

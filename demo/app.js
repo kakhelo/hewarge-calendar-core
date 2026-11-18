@@ -2,13 +2,24 @@ import { createDatePicker } from '../src/picker/index.js';
 
 const input = document.querySelector('#main-date');
 const picker = createDatePicker(input, { calendar: 'kurdish', format: 'DD/MM/YYYY', storageName: 'event_date' });
+const inputLabel = document.querySelector('#main-date-label');
 const gregorian = document.querySelector('#gregorian');
 const calendarName = document.querySelector('#calendar-name');
 const display = document.querySelector('#display-value');
 const json = document.querySelector('#event-json');
-const labels = {kurdish:'کوردی',jalali:'هەوری',gregorian:'زایینی',hijri:'هجری'};
+const labels = {kurdish:'کوردی','kurdish-zayni':'کوردی زاینی',jalali:'هەوری',gregorian:'زایینی',hijri:'هجری'};
+const inputCopy = {
+  kurdish: ['بەرواری کوردی', 'بەروار هەڵبژێرە'],
+  'kurdish-zayni': ['بەرواری کوردی زاینی', 'بەروار هەڵبژێرە'],
+  jalali: ['تاریخ شمسی', 'انتخاب تاریخ'],
+  gregorian: ['Gregorian date', 'Select a date'],
+  hijri: ['التاريخ الهجري', 'اختر التاريخ']
+};
 
 function render(detail){
+  const [label, placeholder] = inputCopy[detail.calendar] || inputCopy.kurdish;
+  inputLabel.textContent = label;
+  input.placeholder = placeholder;
   gregorian.textContent = detail.storageValue || '—';
   calendarName.textContent = labels[detail.calendar] || detail.calendar;
   display.textContent = detail.value || '—';

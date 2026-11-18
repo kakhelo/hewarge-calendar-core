@@ -15,14 +15,14 @@
 <header class="hero">
   <div class="brand-row"><div class="brand-mark">ه</div><div><div class="eyebrow">HEWARGE CALENDAR CORE <span>v1.0.0</span></div><div class="brand">هەوارگە</div></div></div>
   <button id="theme" class="icon-btn" aria-label="گۆڕینی ڕووناکی">◐</button>
-  <div class="hero-copy"><div class="pill">Vanilla JS · Zero Runtime Dependencies</div><h1>بەروار، بە شێوەیەکی <em>کوردی</em> و زیرەک.</h1><p>دیت پیکەرێکی پڕۆفیشناڵ بۆ کوردی، هەوری، زایینی و هجری؛ بە نمایشێکی جیاواز بۆ بەکارهێنەر و بەرواری زایینیی پاک بۆ فرۆنت‌ئێند و بنکەدراوە.</p></div>
+  <div class="hero-copy"><div class="pill">Vanilla JS · Zero Runtime Dependencies</div><h1>بەروار، بە شێوەیەکی <em>کوردی</em> و زیرەک.</h1><p>دیت پیکەرێکی پڕۆفیشناڵ بۆ کوردی، کوردی زاینی، هەوری، زایینی و هجری؛ بە نمایشێکی جیاواز بۆ بەکارهێنەر و بەرواری زایینیی پاک بۆ فرۆنت‌ئێند و بنکەدراوە.</p></div>
 </header>
 <section class="demo-grid">
   <article class="showcase card"><div class="card-head"><div><span class="kicker">LIVE DATE PICKER</span><h2>هەڵبژاردنی بەروار</h2></div><span class="status"><i></i> Live</span></div>
-    <label for="main-date">بەرواری کوردی</label>
+    <label id="main-date-label" for="main-date">بەرواری کوردی</label>
     <div class="input-wrap"><span class="calendar-icon">◫</span><input id="main-date" data-hewarge-datepicker name="event_date_display" data-calendar="kurdish" data-format="DD/MM/YYYY" data-storage-name="event_date" placeholder="بەروار هەڵبژێرە" autocomplete="off"></div>
     <p class="hint">لەسەر مۆبایل: Wheel Picker · لەسەر کۆمپیوتەر: Calendar + Month/Year Selector</p>
-    <div class="quick-row"><button data-set-calendar="kurdish">کوردی</button><button data-set-calendar="jalali">هەوری</button><button data-set-calendar="gregorian">زایینی</button><button data-set-calendar="hijri">هجری</button></div>
+    <div class="quick-row"><button data-set-calendar="kurdish">کوردی</button><button data-set-calendar="kurdish-zayni">کوردی زاینی</button><button data-set-calendar="jalali">هەوری</button><button data-set-calendar="gregorian">زایینی · English</button><button data-set-calendar="hijri">هجری</button></div>
   </article>
   <article class="data card"><div class="card-head"><div><span class="kicker">CANONICAL VALUE</span><h2>بەرواری بنکەدراوە</h2></div><span class="lock">DB</span></div>
     <div class="canonical"><small>Gregorian ISO</small><strong id="gregorian">—</strong></div>
@@ -59,12 +59,14 @@
         <label>میلیچرکە<input id="datetime-millisecond" type="number" min="0" max="999" value="789"></label>
       </div>
       <label for="datetime-calendar">جۆری ساڵژمێر</label>
-      <select id="datetime-calendar"><option value="kurdish" selected>کوردی</option><option value="gregorian">زایینی</option><option value="jalali">هەوری</option><option value="hijri">هجری</option></select>
+      <select id="datetime-calendar"><option value="kurdish" selected>کوردی</option><option value="kurdish-zayni">کوردی زاینی</option><option value="jalali">هەوری</option><option value="gregorian">زایینی · English</option><option value="hijri">هجری</option></select>
       <button id="timestamp-encode" type="button" class="timestamp-button">گۆڕین بۆ Timestamp</button>
       <div class="timestamp-result"><small>ئەنجام</small><strong id="datetime-result-timestamp">—</strong><span id="datetime-result-iso">—</span><p id="timestamp-test-result" role="status">تاقیکردنەوەی گەڕانەوە ئامادەیە.</p></div>
     </article>
   </div>
   <div class="timestamp-actions"><button id="timestamp-test" type="button" class="timestamp-button secondary">تاقیکردنەوەی گەڕانەوە</button><span>بەروار → Timestamp → بەروار</span></div>
+  <div class="timestamp-actions"><button id="calendar-test" type="button" class="timestamp-button secondary">تاقیکردنەوەی هەموو ٥ ساڵژمێرەکان</button></div>
+  <p id="calendar-test-result" class="timestamp-intro" role="status">تاقیکردنەوەی هەموو ساڵژمێرەکان ئامادەیە.</p>
 </section>
 <section class="features"><div class="feature"><b>01</b><strong>نمایش جیاواز</strong><span>ئەوەی بەکارهێنەر دەبینێت لەگەڵ ئەوەی بۆ DB دەنێردرێت جیاوازە.</span></div><div class="feature"><b>02</b><strong>Month / Year Selector</strong><span>لە toolbar ـەکەدا مانگ و ساڵ کلیک بکە و لە selector ـی scroll ـدا هەڵیبژێرە.</span></div><div class="feature"><b>03</b><strong>Mobile Wheel</strong><span>لەسەر مۆبایل ساڵ، مانگ و ڕۆژ بە wheel ـی touch-friendly هەڵدەبژێریت.</span></div></section>
 <section class="code card"><div class="card-head"><div><span class="kicker">API</span><h2>بەکارهێنان</h2></div><button id="copy" class="copy">کۆپی</button></div><pre><code>createDatePicker(input, {

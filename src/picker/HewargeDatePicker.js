@@ -26,12 +26,43 @@ const DEFAULTS = {
 
 const MONTHS = {
   kurdish: ['خاکەلێوە','گوڵان','جۆزەردان','پووشپەڕ','گەلاوێژ','خەرمانان','ڕەزبەر','گەڵاڕێزان','سەرماوەز','بەفرانبار','ڕێبەندان','ڕەشەمە'],
+  'kurdish-zayni': ['کانوونی دووەم','شوبات','ئازار','نیسان','ئایار','حوزەیران','تەممووز','ئاب','ئەیلوول','تشرینی یەکەم','تشرینی دووەم','کانوونی یەکەم'],
   jalali: ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'],
-  gregorian: ['کانوونی دووەم','شوبات','ئازار','نیسان','ئایار','حوزەیران','تەممووز','ئاب','ئەیلوول','تشرینی یەکەم','تشرینی دووەم','کانوونی یەکەم'],
-  hijri: ['موحەڕەم','سەفەر','ڕەبیعی یەکەم','ڕەبیعی دووەم','جەمادی یەکەم','جەمادی دووەم','ڕەجەب','شەعبان','ڕەمەزان','شەوال','ذوالقەعدە','ذوالحجە']
+  gregorian: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+  hijri: ['مُحَرَّم','صَفَر','ربيع الأول','ربيع الآخر','جمادى الأولى','جمادى الآخرة','رجب','شعبان','رمضان','شوّال','ذو القعدة','ذو الحجة']
 };
-const WEEKDAYS = ['یەکشەممە','دووشەممە','سێشەممە','چوارشەممە','پێنجشەممە','هەینی','شەممە'];
-const LABELS = { kurdish:'کوردی', jalali:'هەوری', gregorian:'زایینی', hijri:'هجری' };
+const LOCALES = {
+  kurdish: {
+    direction: 'rtl', title: 'کوردی', kicker: 'هەڵبژاردنی بەروار', close: 'داخستن', previous: 'مانگی پێشوو', next: 'مانگی دواتر',
+    today: 'ئەمڕۆ', done: 'تەواو', selectMonth: 'هەڵبژاردنی مانگ', selectYear: 'هەڵبژاردنی ساڵ',
+    outOfRange: 'ئەم بەروارە لە سنووری دیاریکراودا نییە', invalidDate: 'بەروارەکە دروست نییە',
+    weekdaysShort: ['یە', 'دو', 'سێ', 'چو', 'پێ', 'هە', 'شە']
+  },
+  'kurdish-zayni': {
+    direction: 'rtl', title: 'کوردی زاینی', kicker: 'هەڵبژاردنی بەروار', close: 'داخستن', previous: 'مانگی پێشوو', next: 'مانگی دواتر',
+    today: 'ئەمڕۆ', done: 'تەواو', selectMonth: 'هەڵبژاردنی مانگ', selectYear: 'هەڵبژاردنی ساڵ',
+    outOfRange: 'ئەم بەروارە لە سنووری دیاریکراودا نییە', invalidDate: 'بەروارەکە دروست نییە',
+    weekdaysShort: ['یە', 'دو', 'سێ', 'چو', 'پێ', 'هە', 'شە']
+  },
+  jalali: {
+    direction: 'rtl', title: 'تقویم شمسی', kicker: 'انتخاب تاریخ', close: 'بستن', previous: 'ماه قبل', next: 'ماه بعد',
+    today: 'امروز', done: 'تأیید', selectMonth: 'انتخاب ماه', selectYear: 'انتخاب سال',
+    outOfRange: 'این تاریخ خارج از محدودهٔ مجاز است', invalidDate: 'تاریخ واردشده معتبر نیست',
+    weekdaysShort: ['ی', 'د', 'س', 'چ', 'پ', 'ج', 'ش']
+  },
+  hijri: {
+    direction: 'rtl', title: 'التقويم الهجري', kicker: 'اختيار التاريخ', close: 'إغلاق', previous: 'الشهر السابق', next: 'الشهر التالي',
+    today: 'اليوم', done: 'تم', selectMonth: 'اختيار الشهر', selectYear: 'اختيار السنة',
+    outOfRange: 'هذا التاريخ خارج النطاق المسموح به', invalidDate: 'التاريخ المُدخل غير صالح',
+    weekdaysShort: ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س']
+  },
+  gregorian: {
+    direction: 'ltr', title: 'Gregorian calendar', kicker: 'Select a date', close: 'Close', previous: 'Previous month', next: 'Next month',
+    today: 'Today', done: 'Done', selectMonth: 'Select month', selectYear: 'Select year',
+    outOfRange: 'This date is outside the allowed range', invalidDate: 'The entered date is invalid',
+    weekdaysShort: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+  }
+};
 
 let stylesInstalled = false;
 
@@ -95,6 +126,8 @@ function shiftMonth(calendar, year, month, delta) {
 }
 
 export class HewargeDatePicker {
+  get messages() { return LOCALES[this.calendar] || LOCALES.gregorian; }
+
   constructor(input, options = {}) {
     if (!input || input.nodeType !== 1) throw new TypeError('HewargeDatePicker requires an input element.');
     installStyles();
@@ -255,13 +288,13 @@ export class HewargeDatePicker {
     const day = Number(this.dialog.querySelector('[data-field="day"]').value);
     try {
       const next = HewargeDate.from(this.calendar, year, month, day);
-      if (!this.isAllowed(next)) { this.showMessage('ئەم بەروارە لە سنووری دیاریکراودا نییە'); return; }
+      if (!this.isAllowed(next)) { this.showMessage(this.messages.outOfRange); return; }
       this.value = next;
       this.view = { year, month };
       this.syncInput();
       this.input.dispatchEvent(new CustomEvent('hewarge:change', { bubbles:true, detail:this.detail() }));
       this.renderDialog();
-    } catch { this.showMessage('بەروارەکە دروست نییە'); }
+    } catch { this.showMessage(this.messages.invalidDate); }
   }
 
   showMessage(message) {
@@ -311,6 +344,7 @@ export class HewargeDatePicker {
     const gregorian = this.value.toGregorian();
     const jalali = this.value.toJalali();
     const kurdish = this.value.toKurdish();
+    const kurdishZayni = this.value.convert('kurdish-zayni').toObjectDate();
     const hijri = this.value.toHijri();
     const make = (calendar, value) => ({
       calendar, year: value.year, month: value.month, day: value.day,
@@ -330,6 +364,7 @@ export class HewargeDatePicker {
       gregorian: g,
       jalali: make('jalali', jalali),
       kurdish: make('kurdish', kurdish),
+      kurdishZayni: make('kurdish-zayni', kurdishZayni),
       hijri: make('hijri', hijri)
     };
   }
@@ -344,7 +379,7 @@ export class HewargeDatePicker {
     if (this.dialog) this.dialog.remove();
     if (this.backdrop) this.backdrop.remove();
     this.backdrop = document.createElement('div'); this.backdrop.className = 'hewarge-picker-backdrop';
-    this.dialog = document.createElement('div'); this.dialog.className = 'hewarge-picker-modal'; this.dialog.setAttribute('role','dialog'); this.dialog.setAttribute('aria-modal','true'); this.dialog.dir = 'rtl';
+    this.dialog = document.createElement('div'); this.dialog.className = 'hewarge-picker-modal'; this.dialog.setAttribute('role','dialog'); this.dialog.setAttribute('aria-modal','true'); this.dialog.dir = this.messages.direction;
     const first = monthStart(this.calendar, this.view.year, this.view.month);
     const total = first.daysInMonth;
     const today = this.todayValue();
@@ -358,30 +393,31 @@ export class HewargeDatePicker {
     }
     const prevAllowed = this.canMoveMonth(-1), nextAllowed = this.canMoveMonth(1);
     const selected = this.value || today;
+    const weekdays = this.messages.weekdaysShort;
     if (this.isMobile()) {
       this.renderWheelDialog();
       return;
     }
     this.dialog.innerHTML = `
       <div class="hw-modal-top">
-        <div><span class="hw-kicker">HEWARGE DATE PICKER</span><strong>${esc(LABELS[this.calendar] || this.calendar)}</strong></div>
-        <button type="button" class="hw-close" data-action="close" aria-label="داخستن">×</button>
+        <div><span class="hw-kicker">${esc(this.messages.kicker)}</span><strong>${esc(this.messages.title)}</strong></div>
+        <button type="button" class="hw-close" data-action="close" aria-label="${esc(this.messages.close)}">×</button>
       </div>
       <div class="hw-value"><b>${esc(formatDate(selected, this.options.format))}</b></div>
       <div class="hw-message" role="alert" hidden></div>
       <div class="hw-toolbar">
-        <button type="button" class="hw-nav" data-action="prev" aria-label="مانگی پێشوو" ${prevAllowed?'':'disabled'}>‹</button>
+        <button type="button" class="hw-nav" data-action="prev" aria-label="${esc(this.messages.previous)}" ${prevAllowed?'':'disabled'}>‹</button>
         <div class="hw-toolbar-title">
           <button type="button" class="hw-month-selector" data-action="month-selector" aria-haspopup="listbox" aria-expanded="false">${esc(monthLabel(this.calendar,this.view.month))}<span class="hw-selector-chevron">⌄</span></button>
           <button type="button" class="hw-year-selector" data-action="year-selector" aria-haspopup="listbox" aria-expanded="false">${esc(this.view.year)}<span class="hw-selector-chevron">⌄</span></button>
           <div class="hw-selector-panel" data-selector-panel hidden></div>
         </div>
-        <button type="button" class="hw-nav" data-action="next" aria-label="مانگی دواتر" ${nextAllowed?'':'disabled'}>›</button>
+        <button type="button" class="hw-nav" data-action="next" aria-label="${esc(this.messages.next)}" ${nextAllowed?'':'disabled'}>›</button>
       </div>
-      <div class="hw-week">${Array.from({length:7},(_,i)=>`<span>${esc(WEEKDAYS[(i+this.options.weekStart)%7].slice(0,2))}</span>`).join('')}</div>
+      <div class="hw-week">${Array.from({length:7},(_,i)=>`<span>${esc(weekdays[(i+this.options.weekStart)%7].slice(0,2))}</span>`).join('')}</div>
       <div class="hw-days">${cells.join('')}</div>
       <div class="hw-footer">
-        <div class="hw-actions">${this.options.todayButton?'<button type="button" class="hw-today" data-action="today">ئەمڕۆ</button>':''}<button type="button" class="hw-confirm" data-action="confirm-wheel">تەواو</button></div>
+        <div class="hw-actions">${this.options.todayButton?`<button type="button" class="hw-today" data-action="today">${esc(this.messages.today)}</button>`:''}<button type="button" class="hw-confirm" data-action="confirm-wheel">${esc(this.messages.done)}</button></div>
       </div>
       `;
     this.bindDialog();
@@ -416,11 +452,11 @@ export class HewargeDatePicker {
     const yearItems = years.map(y => item('year',y,y,y===selected.year)).join('');
     this.dialog.innerHTML = `
       <div class="hw-modal-top">
-        <div><span class="hw-kicker">HEWARGE DATE PICKER</span><strong>هەڵبژاردنی بەروار</strong></div>
-        <button type="button" class="hw-close" data-action="close" aria-label="داخستن">×</button>
+        <div><span class="hw-kicker">${esc(this.messages.kicker)}</span><strong>${esc(this.messages.title)}</strong></div>
+        <button type="button" class="hw-close" data-action="close" aria-label="${esc(this.messages.close)}">×</button>
       </div>
       <div class="hw-wheel-summary"><b>${esc(formatDate(selected,this.options.format))}</b></div>
-      <div class="hw-wheel" dir="rtl">
+      <div class="hw-wheel" dir="${this.messages.direction}">
         <div class="hw-wheel-column" data-wheel-column="year"><div class="hw-wheel-fade top"></div><div class="hw-wheel-list">${yearItems}</div><div class="hw-wheel-fade bottom"></div></div>
         <div class="hw-wheel-column" data-wheel-column="month"><div class="hw-wheel-fade top"></div><div class="hw-wheel-list">${months.map(m=>item('month',m,monthLabel(this.calendar,m),m===selected.month)).join('')}</div><div class="hw-wheel-fade bottom"></div></div>
         <div class="hw-wheel-column" data-wheel-column="day"><div class="hw-wheel-fade top"></div><div class="hw-wheel-list">${dayItems}</div><div class="hw-wheel-fade bottom"></div></div>
@@ -428,7 +464,7 @@ export class HewargeDatePicker {
       </div>
       <div class="hw-message" role="alert" hidden></div>
       <div class="hw-footer hw-wheel-footer">
-        <div class="hw-actions">${this.options.todayButton?'<button type="button" class="hw-today" data-action="today">ئەمڕۆ</button>':''}<button type="button" class="hw-confirm" data-action="confirm-wheel">تەواو</button></div>
+        <div class="hw-actions">${this.options.todayButton?`<button type="button" class="hw-today" data-action="today">${esc(this.messages.today)}</button>`:''}<button type="button" class="hw-confirm" data-action="confirm-wheel">${esc(this.messages.done)}</button></div>
       </div>`;
     this.bindWheelDialog(selected);
   }
@@ -646,7 +682,7 @@ export class HewargeDatePicker {
       }
     }
 
-    panel.innerHTML = `<div class="hw-selector-header"><strong>${isMonth ? 'هەڵبژاردنی مانگ' : 'هەڵبژاردنی ساڵ'}</strong><button type="button" class="hw-selector-close" data-action="close-selector" aria-label="داخستن">×</button></div><div class="hw-selector-list">${items.join('')}</div>`;
+    panel.innerHTML = `<div class="hw-selector-header"><strong>${isMonth ? esc(this.messages.selectMonth) : esc(this.messages.selectYear)}</strong><button type="button" class="hw-selector-close" data-action="close-selector" aria-label="${esc(this.messages.close)}">×</button></div><div class="hw-selector-list">${items.join('')}</div>`;
     panel.hidden = false;
     panel.dataset.open = type;
     this.dialog.querySelector('[data-action="month-selector"]').setAttribute('aria-expanded', String(isMonth));

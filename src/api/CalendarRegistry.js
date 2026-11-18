@@ -1,10 +1,11 @@
 import { GregorianCalendar } from '../calendars/gregorian/GregorianCalendar.js';
 import { JalaliCalendar } from '../calendars/jalali/JalaliCalendar.js';
 import { KurdishCalendar } from '../calendars/kurdish/KurdishCalendar.js';
+import { KurdishZayniCalendar } from '../calendars/kurdish/KurdishZayniCalendar.js';
 import { HijriCalendar } from '../calendars/hijri/HijriCalendar.js';
 import { UnsupportedCalendarError } from './errors.js';
 
-const engines = [GregorianCalendar, JalaliCalendar, KurdishCalendar, HijriCalendar];
+const engines = [GregorianCalendar, JalaliCalendar, KurdishCalendar, KurdishZayniCalendar, HijriCalendar];
 const map = new Map();
 for (const engine of engines) for (const key of [engine.id, ...(engine.aliases || [])]) map.set(key.toLowerCase(), engine);
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Added the `kurdish-zayni` calendar, which uses Gregorian date arithmetic with Kurdish month names while preserving the legacy Kurdish calendar.
+- Gregorian picker months and weekdays are displayed in English.
+- Localized picker controls, labels, weekday names, validation messages, text direction, and demo input labels for Kurdish, Persian Jalali, Arabic Hijri, and English Gregorian.
+- Added a demo round-trip test covering all five calendars.
+
 ## 1.2.0 — 2026-09-23
 
 - Date Picker now keeps the selected calendar value in the visible input.

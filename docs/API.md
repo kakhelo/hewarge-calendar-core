@@ -20,6 +20,7 @@ HewargeDate.from('kurdish', 2726, 6, 16);
 HewargeDate.fromGregorian(2026, 9, 7);
 HewargeDate.fromJalali(1405, 6, 16);
 HewargeDate.fromKurdish(2726, 6, 16);
+HewargeDate.fromKurdishZayni(2026, 9, 7);
 HewargeDate.fromHijri(1448, 3, 24);
 ```
 
@@ -53,6 +54,7 @@ value.convert('gregorian');
 value.toGregorian();
 value.toJalali();
 value.toKurdish();
+value.toKurdishZayni();
 value.toHijri();
 ```
 
@@ -128,6 +130,8 @@ CalendarRegistry.all();
 ```
 
 The registry is the extension point for additional calendar engines.
+
+The date picker supports `kurdish`, `kurdish-zayni`, `jalali`, `gregorian`, and `hijri`. Its interface language is selected automatically from the active calendar: Kurdish, Persian for Jalali, Arabic for Hijri, and English for Gregorian. Text direction is RTL for Kurdish, Jalali, and Hijri, and LTR for Gregorian.
 
 ## Timestamp and time-zone conversion
 

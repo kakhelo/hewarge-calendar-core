@@ -28,6 +28,7 @@ export class DateValue {
   toGregorian() { return this.convert('gregorian').toObjectDate(); }
   toJalali() { return this.convert('jalali').toObjectDate(); }
   toKurdish() { return this.convert('kurdish').toObjectDate(); }
+  toKurdishZayni() { return this.convert('kurdish-zayni').toObjectDate(); }
   toHijri() { return this.convert('hijri').toObjectDate(); }
 
   convert(name) {

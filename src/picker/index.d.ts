@@ -44,7 +44,7 @@ export type HewargeChangeDetail = {
   /** Alias of storageValue. */
   gregorianValue: string;
   selected: ConvertedDate;
-  gregorian: ConvertedDate; jalali: ConvertedDate; kurdish: ConvertedDate; hijri: ConvertedDate;
+  gregorian: ConvertedDate; jalali: ConvertedDate; kurdish: ConvertedDate; kurdishZayni: ConvertedDate; hijri: ConvertedDate;
 };
 
 export declare class HewargeDatePicker {
