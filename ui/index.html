@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="/ui/css/style.css">
 <link rel="stylesheet" href="/ui/css/font.css">
 <link rel="stylesheet" href="/ui/css/timestamp-demo.css">
+<link rel="stylesheet" href="/ui/css/time-picker-demo.css">
 </head>
 <body>
 <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
@@ -67,6 +68,32 @@
   <div class="timestamp-actions"><button id="timestamp-test" type="button" class="timestamp-button secondary">تاقیکردنەوەی گەڕانەوە</button><span>بەروار → Timestamp → بەروار</span></div>
   <div class="timestamp-actions"><button id="calendar-test" type="button" class="timestamp-button secondary">تاقیکردنەوەی هەموو ٥ ساڵژمێرەکان</button></div>
   <p id="calendar-test-result" class="timestamp-intro" role="status">تاقیکردنەوەی هەموو ساڵژمێرەکان ئامادەیە.</p>
+</section>
+<section class="time-picker-demo card" aria-labelledby="time-picker-title">
+  <div class="card-head"><div><span class="kicker">DATE · TIME PICKER · LIVE TEST</span><h2 id="time-picker-title">تاقیکردنەوەی هەڵبژاردنی بەروار و کات</h2></div><span class="status"><i></i> Live</span></div>
+  <p class="timestamp-intro">بەروار و کات هەڵبژێرە؛ قالەبی ١٢/٢٤ کاتژمێر، ساڵژمێر و Time Zone بگۆڕە و ئەنجامی یەکگرتوو ببینە.</p>
+  <div class="time-picker-settings">
+    <label>قالبی کات<select id="picker-time-format"><option value="24">٢٤ کاتژمێری</option><option value="12">١٢ کاتژمێری</option></select></label>
+    <label>ساڵژمێر<select id="picker-calendar"><option value="kurdish" selected>کوردی</option><option value="kurdish-zayni">کوردی زاینی</option><option value="jalali">هەوری</option><option value="gregorian">زایینی</option><option value="hijri">هجری</option></select></label>
+    <label>ناوچەی کاتی<select id="picker-time-zone"><option>Asia/Baghdad</option><option>UTC</option><option>Europe/London</option><option>America/New_York</option><option>Asia/Tehran</option><option>Asia/Tokyo</option></select></label>
+  </div>
+  <div class="time-picker-grid">
+    <article class="time-picker-panel">
+      <h3>هەڵبژاردنی یەکگرتووی بەروار و کات</h3>
+      <label for="picker-date">بەروار</label>
+      <input id="picker-date" type="text" placeholder="بەروار هەڵبژێرە" autocomplete="off">
+      <label for="picker-time">کات</label>
+      <input id="picker-time" type="text" dir="ltr" placeholder="کات هەڵبژێرە" autocomplete="off">
+      <p class="time-picker-hint">هەر دوو خانەکە بکەرەوە؛ لە مۆبایل و کۆمپیوتەر تاقی بکەرەوە.</p>
+    </article>
+    <article class="time-picker-panel">
+      <h3>دەرئەنجامی Date-Time</h3>
+      <div class="time-picker-result"><small>Timestamp · میلیچرکە</small><strong id="picker-timestamp">—</strong><span id="picker-iso">—</span></div>
+      <div class="event-box"><div class="box-title">hewarge:datetimechange · event.detail</div><pre id="picker-datetime-json">بەروار و کات هەڵبژێرە.</pre></div>
+      <p id="picker-datetime-status" class="picker-status" role="status">ئامادەی تاقیکردنەوە.</p>
+      <button id="picker-api-test" type="button" class="timestamp-button secondary">تاقیکردنەوەی API ـی کات</button>
+    </article>
+  </div>
 </section>
 <section class="features"><div class="feature"><b>01</b><strong>نمایش جیاواز</strong><span>ئەوەی بەکارهێنەر دەبینێت لەگەڵ ئەوەی بۆ DB دەنێردرێت جیاوازە.</span></div><div class="feature"><b>02</b><strong>Month / Year Selector</strong><span>لە toolbar ـەکەدا مانگ و ساڵ کلیک بکە و لە selector ـی scroll ـدا هەڵیبژێرە.</span></div><div class="feature"><b>03</b><strong>Mobile Wheel</strong><span>لەسەر مۆبایل ساڵ، مانگ و ڕۆژ بە wheel ـی touch-friendly هەڵدەبژێریت.</span></div></section>
 <section class="code card"><div class="card-head"><div><span class="kicker">API</span><h2>بەکارهێنان</h2></div><button id="copy" class="copy">کۆپی</button></div><pre><code>createDatePicker(input, {

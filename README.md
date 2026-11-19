@@ -11,6 +11,10 @@ Hewarge is designed to be used as a **library**, not as a standalone date-picker
 - Immutable `DateValue` API
 - Date arithmetic and comparisons
 - Framework-free modal date picker
+- Compact, responsive scroll-wheel time picker and combined date-time picker
+- Full minute range (00–59), configurable 12/24-hour format, and optional seconds
+- Developer-configured IANA timezone support, including `Asia/Kurdstan` (`Asia/Baghdad` alias)
+- Current-time and exit actions; timezone-aware timestamp events
 - RTL Kurdish-first UI
 - Empty inputs open on today's date
 - Manual year/month/day editing
@@ -69,6 +73,46 @@ input.addEventListener('hewarge:change', (event) => {
 ```
 
 The picker is attached to the input. It does **not** navigate to another page.
+
+## Time Picker and Date-Time Picker
+
+```html
+<input id="appointmentDate" type="text" autocomplete="off">
+<input id="appointmentTime" type="text" autocomplete="off">
+```
+
+```js
+import { createDateTimePicker, createTimePicker } from '@hewarge/calendar-core/picker';
+import '@hewarge/calendar-core/picker/css';
+
+const appointment = createDateTimePicker(
+  document.querySelector('#appointmentDate'),
+  document.querySelector('#appointmentTime'),
+  {
+    calendar: 'kurdish',
+    time: { format: '12', timeZone: 'Asia/Kurdstan', showSeconds: false }
+  }
+);
+
+document.querySelector('#appointmentTime').addEventListener('hewarge:datetimechange', event => {
+  console.log(event.detail.dateTime);  // calendar date and 24-hour time fields
+  console.log(event.detail.timeZone);  // Asia/Kurdstan
+  console.log(event.detail.timestamp); // epoch milliseconds; null on a DST gap
+});
+
+// For time-only controls:
+const clock = createTimePicker(document.querySelector('#clock'), {
+  format: '24',
+  timeZone: 'UTC',
+  showSeconds: true
+});
+```
+
+The compact time picker adapts to desktop and mobile and uses scroll-wheel columns. The minute wheel always includes all 60 values (`00`–`59`). If the input is empty, it opens at the current time in the configured timezone. The timezone is selected by the developer through `timeZone`; the picker itself does not let end users change it. Any IANA timezone supported by the browser runtime can be used. `Asia/Kurdstan` is an application alias for `Asia/Baghdad`.
+
+Time values are stored internally as 24-hour fields. Set `format: '12'` or `'24'` for the input display, and set `showSeconds` to include or omit the seconds wheel. The footer's **Current time** action selects the current time in the configured timezone; **Exit** commits and closes the picker. For an existing picker, `clock.setTimeZone('Asia/Kurdstan')`, `clock.setFormat('12')`, and `clock.setShowSeconds(false)` update its configuration.
+
+The time picker fires `hewarge:timechange` (and `hewarge:change`) after confirmation. The combined picker additionally fires `hewarge:datetimechange` with the selected calendar date/time, `timeZone`, and a Unix timestamp in milliseconds. Nonexistent local times during daylight-saving transitions include `timestamp: null` and a `validationError`.
 
 ## Auto-attach multiple inputs
 

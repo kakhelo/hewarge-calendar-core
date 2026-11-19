@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Added responsive scroll-wheel time and combined date-time pickers, with all 60 minute values, configurable 12/24-hour formatting, optional seconds, developer-configured IANA timezones, and current-time/exit actions.
+- Added the `Asia/Kurdstan` timezone alias for `Asia/Baghdad` and documented timezone-aware date-time events.
 - Added the `kurdish-zayni` calendar, which uses Gregorian date arithmetic with Kurdish month names while preserving the legacy Kurdish calendar.
 - Gregorian picker months and weekdays are displayed in English.
 - Localized picker controls, labels, weekday names, validation messages, text direction, and demo input labels for Kurdish, Persian Jalali, Arabic Hijri, and English Gregorian.

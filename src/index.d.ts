@@ -53,3 +53,4 @@ export declare function gregorianToJalali(input: string | Date | {year:number;mo
 export declare function gregorianToHijri(input: string | Date | {year:number;month:number;day:number}, format?: string): ConvertedDate;
 export declare function timestampToDateTime(timestamp:number, options?:TimestampToDateTimeOptions): DateTimeResult;
 export declare function dateTimeToTimestamp(value:DateValue | DateTimeInput, options?:TimestampOptions): number;
+export declare function normalizeTimeZone(timeZone?:string): string;

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { dateTimeToTimestamp, timestampToDateTime } from '../src/index.js';
+import { dateTimeToTimestamp, timestampToDateTime, normalizeTimeZone } from '../src/index.js';
 
 test('millisecond timestamps round-trip with second and millisecond precision', () => {
   const value = {
@@ -47,4 +47,13 @@ test('nonexistent local times during a daylight-saving gap are rejected', () => 
 test('invalid units and time fields are rejected', () => {
   assert.throws(() => timestampToDateTime(0, { unit: 'minutes' }), /Unsupported timestamp unit/);
   assert.throws(() => dateTimeToTimestamp({ year: 2026, month: 9, day: 7, second: 60 }), /Time must use/);
+});
+
+test('Asia/Kurdstan timezone alias behaves exactly like Asia/Baghdad', () => {
+  assert.equal(normalizeTimeZone('asia/kurdstan'), 'Asia/Baghdad');
+  const value = { calendar: 'gregorian', year: 2026, month: 9, day: 7, hour: 12, minute: 34, second: 56 };
+  const aliasTimestamp = dateTimeToTimestamp(value, { timeZone: 'Asia/Kurdstan' });
+  const baghdadTimestamp = dateTimeToTimestamp(value, { timeZone: 'Asia/Baghdad' });
+  assert.equal(aliasTimestamp, baghdadTimestamp);
+  assert.equal(timestampToDateTime(aliasTimestamp, { timeZone: 'Asia/Kurdstan' }).hour, 12);
 });

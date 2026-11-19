@@ -13,16 +13,27 @@ function normalizeUnit(unit = 'milliseconds') {
   return normalized;
 }
 
-function getFormatter(timeZone) {
+const TIME_ZONE_ALIASES = new Map([
+  ['asia/kurdstan', 'Asia/Baghdad'],
+  ['Asia/Kurdstan', 'Asia/Baghdad']
+]);
+
+/** Normalize supported app-specific time-zone aliases to IANA zones. */
+export function normalizeTimeZone(timeZone = 'UTC') {
   if (typeof timeZone !== 'string' || !timeZone.trim()) throw new TypeError('timeZone must be a non-empty IANA time-zone name.');
-  if (!formatterCache.has(timeZone)) {
-    formatterCache.set(timeZone, new Intl.DateTimeFormat('en-US-u-nu-latn', {
-      timeZone,
+  return TIME_ZONE_ALIASES.get(timeZone) || TIME_ZONE_ALIASES.get(timeZone.toLowerCase()) || timeZone;
+}
+
+function getFormatter(timeZone) {
+  const normalizedTimeZone = normalizeTimeZone(timeZone);
+  if (!formatterCache.has(normalizedTimeZone)) {
+    formatterCache.set(normalizedTimeZone, new Intl.DateTimeFormat('en-US-u-nu-latn', {
+      timeZone: normalizedTimeZone,
       year: 'numeric', month: '2-digit', day: '2-digit',
       hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
     }));
   }
-  return formatterCache.get(timeZone);
+  return formatterCache.get(normalizedTimeZone);
 }
 
 function partsAt(epochMilliseconds, formatter) {

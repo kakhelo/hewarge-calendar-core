@@ -1,4 +1,4 @@
-import { createDatePicker } from '../../src/picker/index.js';
+import { createDatePicker, createDateTimePicker, formatTime, parseTime } from '../../src/picker/index.js';
 import { dateTimeToTimestamp, timestampToDateTime } from '../../src/index.js';
 
 const input = document.querySelector('#main-date');
@@ -163,6 +163,57 @@ document.querySelector('#calendar-test').addEventListener('click', () => {
   const output = document.querySelector('#calendar-test-result');
   output.textContent = `${passedCount}/${results.length} · ${results.map(result => `${result.passed ? '✓' : '✕'} ${labels[result.calendar] || result.calendar}${result.error ? `: ${result.error}` : ''}`).join(' · ')}`;
   output.dataset.state = passedCount === results.length ? 'passed' : 'failed';
+});
+
+const pickerCalendar = document.querySelector('#picker-calendar');
+const pickerTimeFormat = document.querySelector('#picker-time-format');
+const pickerTimeZone = document.querySelector('#picker-time-zone');
+const pickerDateInput = document.querySelector('#picker-date');
+const pickerTimeInput = document.querySelector('#picker-time');
+const pickerTimestamp = document.querySelector('#picker-timestamp');
+const pickerIso = document.querySelector('#picker-iso');
+const pickerJson = document.querySelector('#picker-datetime-json');
+const pickerStatus = document.querySelector('#picker-datetime-status');
+const dateTimeDemo = createDateTimePicker(pickerDateInput, pickerTimeInput, {
+  calendar: pickerCalendar.value,
+  date: { format: 'DD/MM/YYYY', mobileMode: 'auto' },
+  time: { format: pickerTimeFormat.value, timeZone: pickerTimeZone.value, timeZones: ['Asia/Baghdad', 'UTC', 'Europe/London', 'America/New_York', 'Asia/Tehran', 'Asia/Tokyo'], minuteStep: 5, showSeconds: true }
+});
+
+function renderDateTimeDetail(detail) {
+  pickerJson.textContent = JSON.stringify(detail, null, 2);
+  if (detail.timestamp == null) {
+    pickerTimestamp.textContent = detail.validationError || '—';
+    pickerIso.textContent = 'ئەم کاتە لەم ناوچەیەدا بوونی نییە.';
+    pickerStatus.textContent = 'کاتێکی تری هەڵبژێرە؛ لە کاتی گۆڕانی DST ـدا ئەم کاتە بوونی نییە.';
+    pickerStatus.dataset.state = 'failed';
+    return;
+  }
+  pickerTimestamp.textContent = String(detail.timestamp);
+  pickerIso.textContent = `${new Date(detail.timestamp).toISOString()} · ${detail.timeZone}`;
+  pickerStatus.textContent = '✓ بەروار و کات و Time Zone بە سەرکەوتوویی پێکەوە بەستران.';
+  pickerStatus.dataset.state = 'passed';
+}
+
+pickerDateInput.addEventListener('hewarge:datetimechange', event => renderDateTimeDetail(event.detail));
+pickerTimeInput.addEventListener('hewarge:datetimechange', event => renderDateTimeDetail(event.detail));
+pickerCalendar.addEventListener('change', () => {
+  dateTimeDemo.setCalendar(pickerCalendar.value);
+  pickerDateInput.dataset.format = 'DD/MM/YYYY';
+  dateTimeDemo.datePicker.open();
+});
+pickerTimeFormat.addEventListener('change', () => dateTimeDemo.setTimeFormat(pickerTimeFormat.value));
+pickerTimeZone.addEventListener('change', () => dateTimeDemo.setTimeZone(pickerTimeZone.value));
+document.querySelector('#picker-api-test').addEventListener('click', () => {
+  const valid12 = formatTime({ hour: 0, minute: 5, second: 9 }, '12', true) === '12:05:09 AM';
+  const valid24 = formatTime({ hour: 23, minute: 5, second: 9 }, '24', true) === '23:05:09';
+  const parsed = parseTime('12:05 PM', '12');
+  const validParse = parsed?.hour === 12 && parsed.minute === 5 && parsed.second === 0;
+  const passed = valid12 && valid24 && validParse;
+  pickerStatus.textContent = passed
+    ? '✓ API پاس شد: قالب ١٢/٢٤ کاتژمێری و parse/format دروستن.'
+    : '✕ API test شکستیهێنا.';
+  pickerStatus.dataset.state = passed ? 'passed' : 'failed';
 });
 
 timestampInput.value = String(Date.UTC(2026, 8, 7, 16, 34, 56, 789));

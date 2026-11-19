@@ -1,5 +1,51 @@
 # Hewarge Modal Date Picker API
 
+## Time picker and combined date-time
+
+The same package also provides an embeddable time picker with compact, responsive scroll-wheel columns like the date picker, all 60 minute values, 12/24-hour display, optional seconds, and a programmer-configured IANA timezone. Users cannot change the timezone in the picker. `Asia/Kurdstan` is supported as an alias for `Asia/Baghdad`.
+
+```html
+<input id="appointmentDate" type="text" autocomplete="off">
+<input id="appointmentTime" type="text" autocomplete="off">
+```
+
+```js
+import { createDateTimePicker } from '@hewarge/calendar-core/picker';
+import '@hewarge/calendar-core/picker/css';
+
+const appointment = createDateTimePicker(
+  document.querySelector('#appointmentDate'),
+  document.querySelector('#appointmentTime'),
+  {
+    calendar: 'kurdish',
+    date: { format: 'YYYY/MM/DD' },
+    time: { format: '12', timeZone: 'Asia/Kurdstan', showSeconds: false }
+  }
+);
+
+document.querySelector('#appointmentTime').addEventListener('hewarge:datetimechange', event => {
+  console.log(event.detail.dateTime); // calendar date and 24-hour time fields
+  console.log(event.detail.timeZone);
+  console.log(event.detail.timestamp); // epoch milliseconds, or null for a DST gap
+});
+```
+
+Use the independent time-only API when no calendar date is required:
+
+```js
+import { createTimePicker } from '@hewarge/calendar-core/picker';
+
+const clock = createTimePicker(document.querySelector('#time'), {
+  format: '24', // or '12'
+  timeZone: 'Europe/London',
+  showSeconds: false
+});
+```
+
+On opening, the picker shows the current time in its configured timezone if the input is empty. The **Current time** footer button resets the wheel to the current time in that same zone; **Exit** commits the selected time and closes the picker. The time picker fires `hewarge:timechange` (and `hewarge:change`) after confirmation. The composed date-time picker also fires `hewarge:datetimechange`, whose detail includes `dateTime`, `timeZone`, and a millisecond `timestamp`. Any runtime-supported IANA timezone may be configured by the developer; the UI has no timezone selector. `Asia/Kurdstan` is normalized to `Asia/Baghdad`. Nonexistent wall-clock times during a daylight-saving transition are reported through `validationError` and have a `null` timestamp.
+
+Available helpers include `formatTime({hour, minute, second}, '12' | '24')` and `parseTime(text, '12' | '24')`. Use `appointment.setTimeZone('Asia/Tehran')` to update the composed picker's timezone, and `appointment.destroy()` to clean up both controls.
+
 ## Design goal
 
 The date picker is an embeddable component. It is not a standalone page. A developer attaches it to an existing HTML input; focusing or clicking that input opens a modal date picker.

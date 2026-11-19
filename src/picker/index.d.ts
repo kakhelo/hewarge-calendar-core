@@ -69,3 +69,52 @@ export declare const datePicker: {
   attach: typeof attachDatePickers;
   HewargeDatePicker: typeof HewargeDatePicker;
 };
+
+export type HewargeTimePickerOptions = {
+  /** 12-hour or 24-hour clock. */
+  format?: '12' | '24';
+  /** IANA time-zone name, for example Asia/Baghdad. */
+  timeZone?: string;
+  /** Time zones shown in the selector; include the active zone automatically. */
+  timeZones?: string[];
+  /** Minute increment from 1 to 60. */
+  minuteStep?: number;
+  showSeconds?: boolean;
+  keyboard?: boolean;
+  locale?: string;
+  direction?: 'ltr' | 'rtl' | 'auto';
+  selector?: string;
+};
+
+export type HewargeTimeValue = { hour:number; minute:number; second:number };
+export type HewargeTimeChangeDetail = HewargeTimeValue & {
+  format: '12' | '24'; timeZone: string; value: string;
+  dateTime?: { calendar?: CalendarId; year:number; month:number; day:number; hour:number; minute:number; second:number };
+  timestamp?: number | null;
+  validationError?: string;
+};
+
+export declare function formatTime(value: HewargeTimeValue, format?: '12' | '24', showSeconds?: boolean): string;
+export declare function parseTime(value: string, format?: '12' | '24'): HewargeTimeValue | null;
+export declare class HewargeTimePicker {
+  constructor(input: HTMLInputElement, options?: HewargeTimePickerOptions);
+  input: HTMLInputElement; options: HewargeTimePickerOptions; value: HewargeTimeValue; timeZone: string; isOpen: boolean;
+  open(): this; close(): this; destroy(): void; setTime(value: HewargeTimeValue): this; setFormat(format: '12' | '24'): this; setLocale(locale: string): this; setTimeZone(timeZone: string): this;
+  detail(date?: { calendar?: CalendarId; year:number; month:number; day:number }): HewargeTimeChangeDetail;
+}
+export declare function createTimePicker(input: HTMLInputElement, options?: HewargeTimePickerOptions): HewargeTimePicker;
+export declare function attachTimePickers(root?: ParentNode, options?: HewargeTimePickerOptions): HewargeTimePicker[];
+export declare const timePicker: { create: typeof createTimePicker; attach: typeof attachTimePickers; HewargeTimePicker: typeof HewargeTimePicker };
+
+export type HewargeDateTimePickerOptions = Omit<HewargeDatePickerOptions, 'format'> & Omit<HewargeTimePickerOptions, 'format' | 'locale' | 'direction'> & {
+  format?: string;
+  date?: HewargeDatePickerOptions;
+  time?: HewargeTimePickerOptions;
+};
+export declare class HewargeDateTimePicker {
+  constructor(dateInput: HTMLInputElement, timeInput: HTMLInputElement, options?: HewargeDateTimePickerOptions);
+  readonly datePicker: HewargeDatePicker; readonly timePicker: HewargeTimePicker; readonly value: HewargeTimeChangeDetail;
+  setCalendar(calendar: CalendarId): this; setTimeFormat(format: '12' | '24'): this; setTimeZone(timeZone: string): this; destroy(): void;
+}
+export declare function createDateTimePicker(dateInput: HTMLInputElement, timeInput: HTMLInputElement, options?: HewargeDateTimePickerOptions): HewargeDateTimePicker;
+export declare const dateTimePicker: { create: typeof createDateTimePicker; HewargeDateTimePicker: typeof HewargeDateTimePicker };
