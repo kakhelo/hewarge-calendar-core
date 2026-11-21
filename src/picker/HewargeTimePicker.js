@@ -1,5 +1,6 @@
 import { dateTimeToTimestamp, timestampToDateTime, normalizeTimeZone } from '../api/TimestampConverters.js';
 import { createDatePicker } from './HewargeDatePicker.js';
+import { formatTime as formatCoreTime, parseTime as parseCoreTime } from '../formatting/index.js';
 
 const DEFAULTS = {
   format: '24',
@@ -22,29 +23,12 @@ function validateTime(hour, minute, second = 0) {
 }
 
 export function formatTime(value, format = '24', showSeconds = false) {
-  const time = validateTime(Number(value.hour), Number(value.minute), Number(value.second ?? 0));
-  if (!time) throw new RangeError('Time must use hour 0-23 and minute/second 0-59.');
-  const hour12 = time.hour % 12 || 12;
-  const clock = format === '12' ? `${hour12}:${pad(time.minute)}${showSeconds ? `:${pad(time.second)}` : ''} ${time.hour < 12 ? 'AM' : 'PM'}` : `${pad(time.hour)}:${pad(time.minute)}${showSeconds ? `:${pad(time.second)}` : ''}`;
-  return clock;
+  const pattern = format === '12' ? (showSeconds ? 'hh:mm:ss A' : 'hh:mm A') : (showSeconds ? 'HH:mm:ss' : 'HH:mm');
+  return formatCoreTime(value, pattern, { locale: 'en', numberingSystem: 'latn' });
 }
 
 export function parseTime(raw, format = '24') {
-  if (!raw || typeof raw !== 'string') return null;
-  const value = raw.trim();
-  const match12 = value.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)$/i);
-  if (match12) {
-    let hour = Number(match12[1]);
-    const period = match12[4].toUpperCase();
-    if (hour < 1 || hour > 12) return null;
-    hour = (hour % 12) + (period === 'PM' ? 12 : 0);
-    return validateTime(hour, Number(match12[2]), Number(match12[3] || 0));
-  }
-  const match24 = value.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
-  if (!match24) return null;
-  const result = validateTime(Number(match24[1]), Number(match24[2]), Number(match24[3] || 0));
-  if (!result || (format === '12' && Number(match24[1]) > 12)) return null;
-  return result;
+  try { const text=String(raw||'').trim(); const hasSeconds=text.includes(':')&&text.split(':').length>=3; const pattern=format==='12'?(hasSeconds?'hh:mm:ss A':'hh:mm A'):(hasSeconds?'HH:mm:ss':'HH:mm'); const value=parseCoreTime(text,pattern,{locale:'en'}); return {hour:value.hour,minute:value.minute,second:value.second}; } catch { return null; }
 }
 
 function validTimeZone(timeZone) {

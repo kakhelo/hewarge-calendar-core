@@ -1,5 +1,5 @@
 import { createDatePicker, createDateTimePicker, formatTime, parseTime } from '../../src/picker/index.js';
-import { dateTimeToTimestamp, timestampToDateTime } from '../../src/index.js';
+import { dateTimeToTimestamp, timestampToDateTime, formatDate } from '../../src/index.js';
 
 const input = document.querySelector('#main-date');
 const picker = createDatePicker(input, { calendar: 'kurdish', format: 'DD/MM/YYYY', storageName: 'event_date' });
@@ -29,9 +29,26 @@ function render(detail){
 input.addEventListener('hewarge:change', e => render(e.detail));
 input.addEventListener('hewarge:clear', () => { gregorian.textContent='—'; calendarName.textContent='—'; display.textContent='—'; json.textContent='—'; });
 
+const mainDateFormat=document.querySelector('#main-date-format');
+const mainDateLocale=document.querySelector('#main-date-locale');
+const mainDateNumerals=document.querySelector('#main-date-numerals');
+function updateMainFormatting(){
+  picker.options.format=mainDateFormat.value;
+  picker.options.locale=mainDateLocale.value;
+  picker.options.numberingSystem=mainDateNumerals.value;
+  picker.syncInput();
+  const localeMap={kurdish:'ku-SO','kurdish-zayni':'ku-SO',jalali:'fa',hijri:'ar',gregorian:'en'};
+  if(mainDateLocale.value==='auto') mainDateLocale.value=localeMap[picker.calendar];
+  display.textContent=formatDate(picker.value,mainDateFormat.value,{calendar:picker.calendar,locale:mainDateLocale.value,numberingSystem:mainDateNumerals.value});
+}
+mainDateFormat.addEventListener('change',updateMainFormatting);
+mainDateLocale.addEventListener('change',updateMainFormatting);
+mainDateNumerals.addEventListener('change',updateMainFormatting);
 document.querySelectorAll('[data-set-calendar]').forEach(btn => btn.addEventListener('click', () => {
   picker.setCalendar(btn.dataset.setCalendar);
-  picker.open();
+  const defaults={kurdish:'ku-SO','kurdish-zayni':'ku-SO',jalali:'fa',gregorian:'en',hijri:'ar'};
+  mainDateLocale.value=defaults[picker.calendar];
+  updateMainFormatting(); picker.open();
 }));
 
 document.querySelector('#theme').addEventListener('click', () => document.documentElement.classList.toggle('dark'));
@@ -177,7 +194,7 @@ const pickerStatus = document.querySelector('#picker-datetime-status');
 const dateTimeDemo = createDateTimePicker(pickerDateInput, pickerTimeInput, {
   calendar: pickerCalendar.value,
   date: { format: 'DD/MM/YYYY', mobileMode: 'auto' },
-  time: { format: pickerTimeFormat.value, timeZone: pickerTimeZone.value, timeZones: ['Asia/Baghdad', 'UTC', 'Europe/London', 'America/New_York', 'Asia/Tehran', 'Asia/Tokyo'], minuteStep: 5, showSeconds: true }
+  time: { format: pickerTimeFormat.value, timeZone: pickerTimeZone.value, timeZones: ['Asia/Baghdad', 'UTC', 'Europe/London', 'America/New_York', 'Asia/Tehran', 'Asia/Tokyo','Asia/kurdstan'], minuteStep: 5, showSeconds: true }
 });
 
 function renderDateTimeDetail(detail) {

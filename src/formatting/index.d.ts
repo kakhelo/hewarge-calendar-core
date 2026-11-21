@@ -1,0 +1,17 @@
+import type { CalendarId, DateValue, DateTimeInput } from '../index.d.ts';
+export type LocaleId='ku-SO'|'ku-KMR'|'ku'|'fa'|'en'|'ar'|string;
+export type NumberingSystem='latn'|'arab'|'arabicIndic'|'fa'|'persian'|string;
+export type FormatOptions={calendar?:CalendarId;locale?:LocaleId;numberingSystem?:NumberingSystem;timeZone?:string;weekStart?:number};
+export type TokenMetadata={name:string;description:string;example:string;category:string};
+export declare function formatDate(date:DateValue|Date|{calendar?:string;year:number;month:number;day:number},format?:string,options?:FormatOptions):string;
+export declare function formatTime(time:Date|number|{hour:number;minute?:number;second?:number;millisecond?:number},format?:string,options?:FormatOptions):string;
+export declare function formatDateTime(dateTime:DateValue|Date|DateTimeInput,format?:string,options?:FormatOptions):string;
+export declare function parseDate(raw:string,format?:string,options?:FormatOptions):DateValue;
+export declare function parseTime(raw:string,format?:string,options?:FormatOptions):{hour:number;minute:number;second:number;millisecond:number};
+export declare function getAvailableDateTokens():TokenMetadata[];
+export declare function getAvailableTimeTokens():TokenMetadata[];
+export declare function getAvailableFormatPresets():{date:Record<string,string>;time:Record<string,string>;dateTime:Record<string,string>};
+export declare function validateFormat(format:string):{valid:boolean;format:string;parts:any[];unknownTokens:string[];error?:string};
+export declare function tokenizeFormat(format:string):any[];
+export declare function convertNumerals(value:any,numberingSystem?:NumberingSystem):string;
+export declare function resolveLocale(locale?:string,calendar?:string):any;

@@ -1,4 +1,5 @@
 import { HewargeDate, CalendarRegistry } from '../index.js';
+import { formatDate as formatCoreDate, parseDate as parseCoreDate } from '../formatting/index.js';
 
 const DEFAULTS = {
   calendar: 'kurdish',
@@ -78,47 +79,22 @@ function installStyles() {
 function esc(value) {
   return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 }
-function pad(n) { return String(n).padStart(2, '0'); }
-function formatDate(date, pattern) {
-  return pattern.replaceAll('YYYY', String(date.year).padStart(4, '0')).replaceAll('MM', pad(date.month)).replaceAll('DD', pad(date.day)).replaceAll('M', String(date.month)).replaceAll('D', String(date.day));
+
+function formatDate(date, pattern, options = {}) {
+  const calendar= options.calendar || date?.calendar || 'kurdish';
+  const locale= options.locale || (calendar==='jalali'?'fa':calendar==='hijri'?'ar':calendar==='gregorian'?'en':'ku-SO');
+  const numberingSystem=options.numberingSystem || 'latn';
+  return formatCoreDate(date, pattern, { calendar, locale, numberingSystem });
 }
 const ESCAPE_RE = /[.*+?^${}()|[\]\\]/g;
 function escapeRegExp(str) { return str.replace(ESCAPE_RE, '\\$&'); }
-function parseDate(raw, pattern) {
+function parseDate(raw, pattern, options = {}) {
   if (!raw) return null;
-  // Build a regex from the pattern's token order (YYYY/MM/DD in any order/separators).
-  // Split into alternating literal/token parts first, so only the *literal* separators
-  // (e.g. "/" or "-") get regex-escaped — the capture groups themselves must stay intact.
-  const parts = pattern.split(/(YYYY|MM|DD|M|D)/).filter(p => p !== '');
-  const tokens = parts.filter(p => /^(YYYY|MM|DD|M|D)$/.test(p));
-  if (!tokens.length) return null;
-  const groupFor = { YYYY: '(-?\\d{1,6})', MM: '(\\d{1,2})', DD: '(\\d{1,2})', M: '(\\d{1,2})', D: '(\\d{1,2})' };
-  const regexSource = parts.map(p => (groupFor[p] ? groupFor[p] : escapeRegExp(p))).join('');
-  let re;
-  try { re = new RegExp(`^${regexSource}$`); } catch { re = null; }
-  const fieldOf = t => (t === 'YYYY' ? 'year' : t === 'MM' || t === 'M' ? 'month' : 'day');
-  if (re) {
-    const m = raw.trim().match(re);
-    if (m) {
-      const result = {};
-      tokens.forEach((t, i) => { result[fieldOf(t)] = Number(m[i + 1]); });
-      if (result.year != null && result.month != null && result.day != null) return result;
-    }
-  }
-  // Fallback: any three numeric groups, in the pattern's field order
-  const nums = raw.match(/-?\d{1,6}/g);
-  if (nums && nums.length >= 3) {
-    const order = tokens.map(fieldOf);
-    const seen = new Set();
-    const uniqueOrder = order.filter(f => (seen.has(f) ? false : (seen.add(f), true)));
-    const result = {};
-    uniqueOrder.forEach((f, i) => { result[f] = Number(nums[i]); });
-    if (result.year != null && result.month != null && result.day != null) return result;
-  }
-  return null;
+  try { const value=parseCoreDate(raw, pattern, { calendar: options.calendar || 'gregorian', locale: options.locale || 'en' }); return value.toObjectDate(); } catch { return null; }
 }
 export { formatDate, parseDate };
-function monthLabel(calendar, month) { return MONTHS[calendar]?.[month - 1] ?? `${month}`; }
+
+function monthLabel(calendar, month) { const year = calendar === 'jalali' ? 1405 : calendar === 'kurdish' ? 2726 : 2026; return formatCoreDate(HewargeDate.from(calendar, year, month, 1), 'MMMM', { calendar, locale: calendar === 'jalali' ? 'fa' : calendar === 'hijri' ? 'ar' : calendar === 'gregorian' ? 'en' : 'ku-SO' }); }
 function monthStart(calendar, year, month) { return HewargeDate.from(calendar, year, month, 1); }
 function shiftMonth(calendar, year, month, delta) {
   const base = monthStart(calendar, year, month).add({ months: delta });
@@ -332,8 +308,8 @@ export class HewargeDatePicker {
 
   syncInput() {
     const gregorian = this.value.toGregorian();
-    const display = formatDate(this.value, this.options.format);
-    const storage = formatDate(gregorian, 'YYYY-MM-DD');
+    const display = formatDate(this.value, this.options.format, this.options);
+    const storage = formatCoreDate(gregorian, 'YYYY-MM-DD', { calendar:'gregorian', locale:'en', numberingSystem:'latn' });
     if (this.options.inputValue) this.input.value = display;
     this.input.dataset.gregorianValue = storage;
     if (this.storageInput) this.storageInput.value = storage;

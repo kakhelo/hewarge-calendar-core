@@ -23,6 +23,11 @@
     <label id="main-date-label" for="main-date">بەرواری کوردی</label>
     <div class="input-wrap"><span class="calendar-icon">◫</span><input id="main-date" data-hewarge-datepicker name="event_date_display" data-calendar="kurdish" data-format="DD/MM/YYYY" data-storage-name="event_date" placeholder="بەروار هەڵبژێرە" autocomplete="off"></div>
     <p class="hint">لەسەر مۆبایل: Wheel Picker · لەسەر کۆمپیوتەر: Calendar + Month/Year Selector</p>
+    <div class="formatting-controls">
+      <label>قالب بەروار<select id="main-date-format"><option value="D MMMM YYYY">D MMMM YYYY</option><option value="DD/MM/YYYY">DD/MM/YYYY</option><option value="YYYY-MM-DD">YYYY-MM-DD</option><option value="dddd، D MMMM YYYY">dddd، D MMMM YYYY</option><option value="MMMM YYYY">MMMM YYYY</option></select></label>
+      <label>Locale<select id="main-date-locale"><option value="ku-SO">ku-SO · سۆرانی</option><option value="ku-KMR">ku-KMR · کرمانجی</option><option value="fa">fa · فارسی</option><option value="en">en · English</option><option value="ar">ar · العربية</option></select></label>
+      <label>ژمارە<select id="main-date-numerals"><option value="latn">Latin</option><option value="fa">فارسی</option><option value="arab">عربی هندی</option></select></label>
+    </div>
     <div class="quick-row"><button data-set-calendar="kurdish">کوردی</button><button data-set-calendar="kurdish-zayni">کوردی زاینی</button><button data-set-calendar="jalali">هەوری</button><button data-set-calendar="gregorian">زایینی · English</button><button data-set-calendar="hijri">هجری</button></div>
   </article>
   <article class="data card"><div class="card-head"><div><span class="kicker">CANONICAL VALUE</span><h2>بەرواری بنکەدراوە</h2></div><span class="lock">DB</span></div>
@@ -75,7 +80,7 @@
   <div class="time-picker-settings">
     <label>قالبی کات<select id="picker-time-format"><option value="24">٢٤ کاتژمێری</option><option value="12">١٢ کاتژمێری</option></select></label>
     <label>ساڵژمێر<select id="picker-calendar"><option value="kurdish" selected>کوردی</option><option value="kurdish-zayni">کوردی زاینی</option><option value="jalali">هەوری</option><option value="gregorian">زایینی</option><option value="hijri">هجری</option></select></label>
-    <label>ناوچەی کاتی<select id="picker-time-zone"><option>Asia/Baghdad</option><option>UTC</option><option>Europe/London</option><option>America/New_York</option><option>Asia/Tehran</option><option>Asia/Tokyo</option></select></label>
+    <label>ناوچەی کاتی<select id="picker-time-zone"><option value="Asia/Kurdstan" selected>کوردستان · UTC+03:00 (Asia/Kurdstan)</option><option value="Asia/Baghdad">بەغدا · UTC+03:00 (Asia/Baghdad)</option><option value="UTC">UTC</option><option value="Europe/London">Europe/London</option><option value="America/New_York">America/New_York</option><option value="Asia/Tehran">Asia/Tehran</option><option value="Asia/Tokyo">Asia/Tokyo</option></select></label>
   </div>
   <div class="time-picker-grid">
     <article class="time-picker-panel">

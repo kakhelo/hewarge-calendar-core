@@ -74,6 +74,70 @@ input.addEventListener('hewarge:change', (event) => {
 
 The picker is attached to the input. It does **not** navigate to another page.
 
+## Date and Time Formatting Engine
+
+The core provides a framework-independent formatting engine shared by the Date Picker and Time Picker.
+
+```js
+import {
+  HewargeDate,
+  formatDate,
+  formatTime,
+  formatDateTime,
+  parseDate,
+  parseTime
+} from '@hewarge/calendar-core';
+
+formatDate(HewargeDate.fromKurdish(2726, 6, 16), 'D MMMM YYYY', {
+  calendar: 'kurdish', locale: 'ku-SO', numberingSystem: 'latn'
+});
+// 16 خەرمانان 2726
+
+formatTime(
+  { hour: 8, minute: 5, second: 9, millisecond: 123 },
+  'hh:mm:ss.SSS A',
+  { locale: 'en', numberingSystem: 'latn', timeZone: 'UTC' }
+);
+// 08:05:09.123 AM
+
+formatDateTime(
+  { calendar: 'gregorian', year: 2026, month: 9, day: 7, hour: 8, minute: 5 },
+  'YYYY-MM-DDTHH:mm:ssZ',
+  { timeZone: 'UTC' }
+);
+```
+
+A dedicated formatting entry point is also available:
+
+```js
+import { formatDate, formatTime, getAvailableDateTokens } from '@hewarge/calendar-core/formatting';
+```
+
+Supported locales include `ku-SO`, `ku-KMR`, `fa`, `en`, and `ar`. Numeral systems can be selected independently as `latn`, `fa`/`persian`, or `arab`/`arabicIndic`.
+
+| Category | Tokens | Meaning |
+|---|---|---|
+| Year | `Y`, `YY`, `YYYY` | Full, two-digit, and padded four-digit year |
+| Month | `M`, `MM`, `MMM`, `MMMM`, `MMMMM` | Numeric, abbreviated, full, and narrow localized month |
+| Day | `D`, `DD` | Day with or without padding |
+| Day of year | `DDD`, `DDDD` | Day number with optional three-digit padding |
+| Weekday | `d`, `dd`, `ddd`, `dddd` | Numeric, narrow, abbreviated, and full weekday |
+| Calendar/ISO week | `w`/`ww`, `W`/`WW` | Calendar-specific or ISO-8601 week number |
+| Hour | `H`/`HH`, `h`/`hh`, `k`/`kk` | 24-hour, 12-hour, or 1–24-hour clock |
+| Minute/second | `m`/`mm`, `s`/`ss` | Minute and second with optional padding |
+| Millisecond | `S`, `SS`, `SSS` | One, two, or three millisecond digits |
+| Meridiem | `A`, `a` | Uppercase/lowercase localized AM/PM |
+| Timezone | `Z`, `ZZ`, `z`, `zz` | UTC offset, short runtime name, or IANA identifier |
+
+Literal text can be wrapped in brackets: `[Day] D [of] MMMM YYYY`. Backslash escaping is also supported.
+
+```js
+parseDate('16/06/2726', 'DD/MM/YYYY', { calendar: 'kurdish', locale: 'ku-SO' });
+parseTime('12:05 PM', 'hh:mm A', { locale: 'en' });
+```
+
+Parsing validates calendar dates and time fields and rejects invalid values. Formats that omit required fields cannot reconstruct the complete original value. Complete details are in [docs/FORMATTING.md](./docs/FORMATTING.md).
+
 ## Time Picker and Date-Time Picker
 
 ```html
@@ -377,7 +441,7 @@ picker.setCalendar('gregorian'); // English UI
 @hewarge/calendar-core/picker/css
 ```
 
-The core export contains the calendar/date API. The picker export contains the embeddable modal UI API. The CSS export contains the picker styles.
+The core export contains the calendar/date and formatting APIs. The picker export contains the embeddable modal UI API. The formatting export contains the UI-independent formatting and parsing APIs. The CSS export contains the picker styles.
 
 ## Testing
 

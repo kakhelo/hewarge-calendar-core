@@ -11,6 +11,10 @@
       "types": "./src/index.d.ts",
       "import": "./src/index.js"
     },
+    "./formatting": {
+      "types": "./src/formatting/index.d.ts",
+      "import": "./src/formatting/index.js"
+    },
     "./picker": {
       "types": "./src/picker/index.d.ts",
       "import": "./src/picker/index.js"
