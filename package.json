@@ -1,6 +1,6 @@
 {
   "name": "@hewarge/calendar-core",
-  "version": "1.4.1",
+  "version": "1.6.1",
   "description": "Hewarge multi-calendar date/time core with timezone-aware timestamps and responsive date, time, and date-time pickers.",
   "type": "module",
   "main": "./src/index.js",

@@ -2,6 +2,8 @@ import type { CalendarId, DateValue } from '../index.d.ts';
 
 export type HewargeDatePickerOptions = {
   calendar?: CalendarId;
+  /** Visual interface per picker instance. */
+  variant?: 'default' | 'calendar-card' | 'calendar-glass';
   locale?: string;
   format?: string;
   /** Legacy/custom Gregorian parsing format. Storage is always canonical YYYY-MM-DD. */
@@ -70,7 +72,48 @@ export declare const datePicker: {
   HewargeDatePicker: typeof HewargeDatePicker;
 };
 
+/** Options for the UI-independent controller used to build custom or native interfaces. */
+export type HewargeDatePickerControllerOptions = Pick<HewargeDatePickerOptions,
+  'calendar' | 'locale' | 'format' | 'weekStart' | 'direction' | 'pastYears' | 'futureYears' |
+  'pastMonths' | 'futureMonths' | 'minDate' | 'maxDate'> & {
+  value?: DateValue | { calendar?: CalendarId; year: number; month: number; day: number };
+  initialValue?: DateValue | { calendar?: CalendarId; year: number; month: number; day: number };
+  /** Injectable clock useful for deterministic tests and platform integrations. */
+  todayProvider?: () => DateValue | { calendar?: CalendarId; year: number; month: number; day: number };
+};
+export type HewargeDatePickerControllerState = {
+  calendar: CalendarId; locale: string; direction: 'ltr' | 'rtl'; title: string;
+  value: { year: number; month: number; day: number } | null;
+  formattedValue: string; gregorianValue: string | null;
+  view: { year: number; month: number }; monthLabel: string; weekStart: number;
+  weekdays: string[]; leadingEmptyDays: number;
+  days: Array<{ day: number; date: { year: number; month: number; day: number }; selected: boolean; today: boolean; allowed: boolean }>;
+  canMovePrevious: boolean; canMoveNext: boolean;
+  bounds: { min: { year: number; month: number; day: number } | null; max: { year: number; month: number; day: number } | null };
+};
+export declare class HewargeDatePickerController {
+  constructor(options?: HewargeDatePickerControllerOptions);
+  readonly calendar: CalendarId;
+  value: DateValue | null;
+  view: { year: number; month: number };
+  readonly options: HewargeDatePickerControllerOptions;
+  getState(): HewargeDatePickerControllerState;
+  subscribe(listener: (event: { type: 'change' | 'view' | 'clear'; state: HewargeDatePickerControllerState }) => void): () => boolean;
+  isAllowed(date: DateValue | { calendar?: CalendarId; year: number; month: number; day: number }): boolean;
+  canMoveMonth(delta: number): boolean;
+  setCalendar(calendar: CalendarId): this;
+  setDate(date: DateValue | { calendar?: CalendarId; year: number; month: number; day: number }): this;
+  select(day: number): this;
+  setView(year: number, month: number): this;
+  navigate(delta: number): this;
+  goToToday(): this;
+  clear(): this;
+}
+export declare function createDatePickerController(options?: HewargeDatePickerControllerOptions): HewargeDatePickerController;
+
 export type HewargeTimePickerOptions = {
+  /** Visual time-picker interface. */
+  variant?: 'default' | 'analog-clock' | 'ios-wheel';
   /** 12-hour or 24-hour clock. */
   format?: '12' | '24';
   /** IANA time-zone name, for example Asia/Baghdad. */
@@ -99,22 +142,26 @@ export declare function parseTime(value: string, format?: '12' | '24'): HewargeT
 export declare class HewargeTimePicker {
   constructor(input: HTMLInputElement, options?: HewargeTimePickerOptions);
   input: HTMLInputElement; options: HewargeTimePickerOptions; value: HewargeTimeValue; timeZone: string; isOpen: boolean;
-  open(): this; close(): this; destroy(): void; setTime(value: HewargeTimeValue): this; setFormat(format: '12' | '24'): this; setLocale(locale: string): this; setTimeZone(timeZone: string): this;
+  open(): this; close(): this; destroy(): void; setTime(value: HewargeTimeValue): this; setVariant(variant: 'default' | 'analog-clock' | 'ios-wheel'): this; setFormat(format: '12' | '24'): this; setShowSeconds(showSeconds: boolean): this; setLocale(locale: string): this; setTimeZone(timeZone: string): this;
   detail(date?: { calendar?: CalendarId; year:number; month:number; day:number }): HewargeTimeChangeDetail;
 }
 export declare function createTimePicker(input: HTMLInputElement, options?: HewargeTimePickerOptions): HewargeTimePicker;
 export declare function attachTimePickers(root?: ParentNode, options?: HewargeTimePickerOptions): HewargeTimePicker[];
 export declare const timePicker: { create: typeof createTimePicker; attach: typeof attachTimePickers; HewargeTimePicker: typeof HewargeTimePicker };
 
-export type HewargeDateTimePickerOptions = Omit<HewargeDatePickerOptions, 'format'> & Omit<HewargeTimePickerOptions, 'format' | 'locale' | 'direction'> & {
+export type HewargeDateTimePickerOptions = Omit<HewargeDatePickerOptions, 'format' | 'variant'> & Omit<HewargeTimePickerOptions, 'format' | 'locale' | 'direction' | 'variant'> & {
+  /** Visual date-picker interface. */
+  variant?: 'default' | 'calendar-card' | 'calendar-glass';
   format?: string;
+  /** Visual time-picker interface for the composed picker. */
+  timeVariant?: 'default' | 'analog-clock' | 'ios-wheel';
   date?: HewargeDatePickerOptions;
   time?: HewargeTimePickerOptions;
 };
 export declare class HewargeDateTimePicker {
   constructor(dateInput: HTMLInputElement, timeInput: HTMLInputElement, options?: HewargeDateTimePickerOptions);
   readonly datePicker: HewargeDatePicker; readonly timePicker: HewargeTimePicker; readonly value: HewargeTimeChangeDetail;
-  setCalendar(calendar: CalendarId): this; setTimeFormat(format: '12' | '24'): this; setTimeZone(timeZone: string): this; destroy(): void;
+  setCalendar(calendar: CalendarId): this; setTimeFormat(format: '12' | '24'): this; setTimeVariant(variant: 'default' | 'analog-clock' | 'ios-wheel'): this; setShowSeconds(showSeconds: boolean): this; setTimeZone(timeZone: string): this; destroy(): void;
 }
 export declare function createDateTimePicker(dateInput: HTMLInputElement, timeInput: HTMLInputElement, options?: HewargeDateTimePickerOptions): HewargeDateTimePicker;
 export declare const dateTimePicker: { create: typeof createDateTimePicker; HewargeDateTimePicker: typeof HewargeDateTimePicker };

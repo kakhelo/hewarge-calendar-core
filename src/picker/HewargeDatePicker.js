@@ -3,6 +3,7 @@ import { formatDate as formatCoreDate, parseDate as parseCoreDate } from '../for
 
 const DEFAULTS = {
   calendar: 'kurdish',
+  variant: 'default',
   locale: 'ku',
   format: 'YYYY/MM/DD',
   gregorianFormat: 'YYYY-MM-DD',
@@ -34,31 +35,31 @@ const MONTHS = {
 };
 const LOCALES = {
   kurdish: {
-    direction: 'rtl', title: 'کوردی', kicker: 'هەڵبژاردنی بەروار', close: 'داخستن', previous: 'مانگی پێشوو', next: 'مانگی دواتر',
+    direction: 'rtl', title: 'کوردی', pickerTitle: 'هەڵبژاردنی بەروار', kicker: 'هەڵبژاردنی بەروار', confirm: 'پشتڕاستکردنەوە', close: 'داخستن', previous: 'مانگی پێشوو', next: 'مانگی دواتر',
     today: 'ئەمڕۆ', done: 'تەواو', selectMonth: 'هەڵبژاردنی مانگ', selectYear: 'هەڵبژاردنی ساڵ',
     outOfRange: 'ئەم بەروارە لە سنووری دیاریکراودا نییە', invalidDate: 'بەروارەکە دروست نییە',
     weekdaysShort: ['یە', 'دو', 'سێ', 'چو', 'پێ', 'هە', 'شە']
   },
   'kurdish-zayni': {
-    direction: 'rtl', title: 'کوردی زاینی', kicker: 'هەڵبژاردنی بەروار', close: 'داخستن', previous: 'مانگی پێشوو', next: 'مانگی دواتر',
+    direction: 'rtl', title: 'کوردی زاینی', pickerTitle: 'هەڵبژاردنی بەروار', kicker: 'هەڵبژاردنی بەروار', confirm: 'پشتڕاستکردنەوە', close: 'داخستن', previous: 'مانگی پێشوو', next: 'مانگی دواتر',
     today: 'ئەمڕۆ', done: 'تەواو', selectMonth: 'هەڵبژاردنی مانگ', selectYear: 'هەڵبژاردنی ساڵ',
     outOfRange: 'ئەم بەروارە لە سنووری دیاریکراودا نییە', invalidDate: 'بەروارەکە دروست نییە',
     weekdaysShort: ['یە', 'دو', 'سێ', 'چو', 'پێ', 'هە', 'شە']
   },
   jalali: {
-    direction: 'rtl', title: 'تقویم شمسی', kicker: 'انتخاب تاریخ', close: 'بستن', previous: 'ماه قبل', next: 'ماه بعد',
+    direction: 'rtl', title: 'تقویم شمسی', pickerTitle: 'انتخاب تاریخ', kicker: 'انتخاب تاریخ', confirm: 'تأیید', close: 'بستن', previous: 'ماه قبل', next: 'ماه بعد',
     today: 'امروز', done: 'تأیید', selectMonth: 'انتخاب ماه', selectYear: 'انتخاب سال',
     outOfRange: 'این تاریخ خارج از محدودهٔ مجاز است', invalidDate: 'تاریخ واردشده معتبر نیست',
     weekdaysShort: ['ی', 'د', 'س', 'چ', 'پ', 'ج', 'ش']
   },
   hijri: {
-    direction: 'rtl', title: 'التقويم الهجري', kicker: 'اختيار التاريخ', close: 'إغلاق', previous: 'الشهر السابق', next: 'الشهر التالي',
+    direction: 'rtl', title: 'التقويم الهجري', pickerTitle: 'اختيار التاريخ', kicker: 'اختيار التاريخ', confirm: 'تأكيد', close: 'إغلاق', previous: 'الشهر السابق', next: 'الشهر التالي',
     today: 'اليوم', done: 'تم', selectMonth: 'اختيار الشهر', selectYear: 'اختيار السنة',
     outOfRange: 'هذا التاريخ خارج النطاق المسموح به', invalidDate: 'التاريخ المُدخل غير صالح',
     weekdaysShort: ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س']
   },
   gregorian: {
-    direction: 'ltr', title: 'Gregorian calendar', kicker: 'Select a date', close: 'Close', previous: 'Previous month', next: 'Next month',
+    direction: 'ltr', title: 'Gregorian calendar', pickerTitle: 'Select Date', kicker: 'Select a date', confirm: 'Confirm', close: 'Close', previous: 'Previous month', next: 'Next month',
     today: 'Today', done: 'Done', selectMonth: 'Select month', selectYear: 'Select year',
     outOfRange: 'This date is outside the allowed range', invalidDate: 'The entered date is invalid',
     weekdaysShort: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
@@ -104,11 +105,19 @@ function shiftMonth(calendar, year, month, delta) {
 export class HewargeDatePicker {
   get messages() { return LOCALES[this.calendar] || LOCALES.gregorian; }
 
+  get locale() {
+    if (this._localeExplicit) return this.options.locale;
+    return this.calendar === 'jalali' ? 'fa' : this.calendar === 'hijri' ? 'ar' : this.calendar === 'gregorian' ? 'en' : 'ku-SO';
+  }
+
   constructor(input, options = {}) {
     if (!input || input.nodeType !== 1) throw new TypeError('HewargeDatePicker requires an input element.');
     installStyles();
     this.input = input;
     this.options = { ...DEFAULTS, ...options };
+    this._localeExplicit = options.locale != null;
+    if (!['default', 'calendar-card', 'calendar-glass'].includes(this.options.variant)) throw new RangeError('Date picker variant must be "default", "calendar-card" or "calendar-glass".');
+    if (options.weekStart === undefined && this.options.variant === 'calendar-glass') this.options.weekStart = 1;
     const requestedWeekStart = Number(this.options.weekStart);
     this.options.weekStart = Number.isFinite(requestedWeekStart) ? ((Math.trunc(requestedWeekStart) % 7) + 7) % 7 : DEFAULTS.weekStart;
     this.calendar = this.options.calendar;
@@ -135,11 +144,11 @@ export class HewargeDatePicker {
     const raw = this.input.value?.trim();
     if (!raw) return null;
     try {
-      const parsed = parseDate(raw, this.options.format);
+      const parsed = parseDate(raw, this.options.format, { calendar: this.calendar, locale: this.locale });
       if (parsed) return HewargeDate.from(this.calendar, parsed.year, parsed.month, parsed.day);
     } catch {}
     try {
-      const parsed = parseDate(raw, this.options.gregorianFormat);
+      const parsed = parseDate(raw, this.options.gregorianFormat, { calendar: 'gregorian', locale: 'en' });
       if (parsed) return HewargeDate.fromGregorian(parsed.year, parsed.month, parsed.day).convert(this.calendar);
     } catch {}
     return null;
@@ -166,14 +175,20 @@ export class HewargeDatePicker {
     return typeof window !== 'undefined' && window.matchMedia('(max-width: 600px)').matches;
   }
 
+  usesDraftSelection() {
+    return (this.options.variant === 'calendar-card' && this.isMobile()) || (this.options.variant === 'calendar-glass' && this.isMobile());
+  }
+
   open() {
     if (this.isOpen) return this;
     this.isOpen = true;
+    this.draftValue = this.value;
     this.view = { year: this.value.year, month: this.value.month };
     this.renderDialog();
     document.body.appendChild(this.backdrop);
     document.body.appendChild(this.dialog);
     this.dialog.addEventListener('keydown', this._onDialogKeyDown);
+    this.position();
     requestAnimationFrame(() => {
       this.position();
       this.dialog.classList.add('hewarge-picker-open');
@@ -186,6 +201,7 @@ export class HewargeDatePicker {
   close() {
     if (!this.isOpen) return this;
     this.isOpen = false;
+    this.draftValue = null;
     this.dialog?.removeEventListener('keydown', this._onDialogKeyDown);
     this.dialog?.remove(); this.backdrop?.remove();
     this.input.setAttribute('aria-expanded', 'false');
@@ -282,6 +298,7 @@ export class HewargeDatePicker {
     const engine = CalendarRegistry.get(calendar);
     this.calendar = engine.id;
     this.value = this.value.convert(this.calendar);
+    if (this.draftValue) this.draftValue = this.draftValue.convert(this.calendar);
     this.view = { year: this.value.year, month: this.value.month };
     this.input.dataset.calendar = this.calendar;
     if (this.isOpen) this.renderDialog();
@@ -294,6 +311,11 @@ export class HewargeDatePicker {
     try {
       const next = HewargeDate.from(this.calendar, this.view.year, this.view.month, day);
       if (!this.isAllowed(next)) return;
+      if (this.usesDraftSelection() && this.isOpen) {
+        this.draftValue = next;
+        this.renderDialog();
+        return;
+      }
       this.value = next;
       this.syncInput();
       this.input.dispatchEvent(new CustomEvent('hewarge:change', { bubbles: true, detail: this.detail() }));
@@ -308,7 +330,7 @@ export class HewargeDatePicker {
 
   syncInput() {
     const gregorian = this.value.toGregorian();
-    const display = formatDate(this.value, this.options.format, this.options);
+    const display = formatDate(this.value, this.options.format, { ...this.options, locale: this.locale });
     const storage = formatCoreDate(gregorian, 'YYYY-MM-DD', { calendar:'gregorian', locale:'en', numberingSystem:'latn' });
     if (this.options.inputValue) this.input.value = display;
     this.input.dataset.gregorianValue = storage;
@@ -372,6 +394,17 @@ export class HewargeDatePicker {
     const weekdays = this.messages.weekdaysShort;
     if (this.isMobile()) {
       this.renderWheelDialog();
+      this.mountRerenderedDialog(wasMounted);
+      return;
+    }
+    if (this.options.variant === 'calendar-card') {
+      this.renderCardDialog({ total, offset, today });
+      this.mountRerenderedDialog(wasMounted);
+      return;
+    }
+    if (this.options.variant === 'calendar-glass') {
+      this.renderGlassDialog({ total, offset, today });
+      this.mountRerenderedDialog(wasMounted);
       return;
     }
     this.dialog.innerHTML = `
@@ -379,7 +412,7 @@ export class HewargeDatePicker {
         <div><span class="hw-kicker">${esc(this.messages.kicker)}</span><strong>${esc(this.messages.title)}</strong></div>
         <button type="button" class="hw-close" data-action="close" aria-label="${esc(this.messages.close)}">×</button>
       </div>
-      <div class="hw-value"><b>${esc(formatDate(selected, this.options.format))}</b></div>
+      <div class="hw-value"><b>${esc(formatDate(selected, this.options.format, { ...this.options, locale: this.locale }))}</b></div>
       <div class="hw-message" role="alert" hidden></div>
       <div class="hw-toolbar">
         <button type="button" class="hw-nav" data-action="prev" aria-label="${esc(this.messages.previous)}" ${prevAllowed?'':'disabled'}>‹</button>
@@ -400,18 +433,104 @@ export class HewargeDatePicker {
 
     // open() mounts the initial dialog. For subsequent rerenders while open,
     // mount the new dialog immediately and restore its modal behavior.
-    if (wasMounted && this.isOpen) {
-      document.body.appendChild(this.dialog);
-      this.dialog.addEventListener('keydown', this._onDialogKeyDown);
-      requestAnimationFrame(() => {
-        this.position();
-        this.dialog?.classList.add('hewarge-picker-open');
-      });
+    this.mountRerenderedDialog(wasMounted);
+  }
+
+  mountRerenderedDialog(wasMounted) {
+    if (!wasMounted || !this.isOpen) return;
+    document.body.append(this.backdrop, this.dialog);
+    this.dialog.addEventListener('keydown', this._onDialogKeyDown);
+    this.position();
+    requestAnimationFrame(() => {
+      this.position();
+      this.dialog?.classList.add('hewarge-picker-open');
+    });
+  }
+
+  renderCardDialog({ total, offset, today }) {
+    const selected = this.draftValue || this.value || today;
+    const previousMonth = monthStart(this.calendar, this.view.year, this.view.month).add({ months: -1 });
+    const nextMonth = monthStart(this.calendar, this.view.year, this.view.month).add({ months: 1 });
+    const weekdays = this.messages.weekdaysShort;
+    const cells = [];
+
+    for (let index = 0; index < offset; index++) {
+      const day = previousMonth.daysInMonth - offset + index + 1;
+      cells.push(`<span class="hw-card-day is-outside" aria-hidden="true">${day}</span>`);
     }
+    for (let day = 1; day <= total; day++) {
+      const date = HewargeDate.from(this.calendar, this.view.year, this.view.month, day);
+      const active = date.isSame(selected);
+      const isToday = date.isSame(today);
+      const allowed = this.isAllowed(date);
+      cells.push(`<button type="button" class="hw-card-day${active ? ' is-selected' : ''}${isToday ? ' is-today' : ''}" data-day="${day}" ${allowed ? '' : 'disabled'} aria-label="${esc(day + ' ' + monthLabel(this.calendar, this.view.month) + ' ' + this.view.year)}"${active ? ' aria-current="date"' : ''}>${day}</button>`);
+    }
+    const filledCells = offset + total;
+    const trailing = (7 - (filledCells % 7)) % 7;
+    for (let index = 1; index <= trailing; index++) {
+      cells.push(`<span class="hw-card-day is-outside" aria-hidden="true">${index}</span>`);
+    }
+
+    this.dialog.classList.add('hw-ui-card');
+    this.dialog.innerHTML = `
+      <div class="hw-card-heading">
+        <div class="hw-card-title"><span class="hw-kicker">${esc(this.messages.kicker)}</span><strong>${esc(this.messages.pickerTitle || this.messages.title)}</strong></div>
+        <div class="hw-card-date-icon" aria-hidden="true"><span>${String(selected.day).padStart(2, '0')}</span></div>
+        <button type="button" class="hw-close hw-card-close" data-action="close" aria-label="${esc(this.messages.close)}">×</button>
+      </div>
+      <div class="hw-card-toolbar">
+        <button type="button" class="hw-card-selector" data-action="month-selector" aria-haspopup="listbox" aria-expanded="false">${esc(monthLabel(this.calendar, this.view.month))}<span aria-hidden="true">⌄</span></button>
+        <button type="button" class="hw-card-selector" data-action="year-selector" aria-haspopup="listbox" aria-expanded="false">${esc(this.view.year)}<span aria-hidden="true">⌄</span></button>
+        <div class="hw-selector-panel" data-selector-panel hidden></div>
+      </div>
+      <div class="hw-message" role="alert" hidden></div>
+      <div class="hw-card-week">${Array.from({ length: 7 }, (_, index) => {
+        const weekdayIndex = (index + this.options.weekStart) % 7;
+        return `<span>${esc(weekdays[weekdayIndex].slice(0, 3))}</span>`;
+      }).join('')}</div>
+      <div class="hw-card-days">${cells.join('')}</div>
+      <div class="hw-card-footer">${this.options.todayButton ? `<button type="button" class="hw-today" data-action="today">${esc(this.messages.today)}</button>` : ''}<button type="button" class="hw-confirm" data-action="close">${esc(this.messages.close)}</button></div>`;
+    this.bindDialog();
+
+    if (this.backdrop) this.backdrop.classList.add('hw-ui-card-backdrop');
+  }
+
+  renderGlassDialog({ total, offset, today }) {
+    const selected = this.value || today;
+    const previous = monthStart(this.calendar, this.view.year, this.view.month).add({ months: -1 });
+    const weekdays = this.messages.weekdaysShort;
+    const cells = [];
+    for (let index = 0; index < offset; index++) {
+      cells.push(`<span class="hw-glass-day is-outside" aria-hidden="true">${previous.daysInMonth - offset + index + 1}</span>`);
+    }
+    for (let day = 1; day <= total; day++) {
+      const date = HewargeDate.from(this.calendar, this.view.year, this.view.month, day);
+      const active = date.isSame(selected);
+      const allowed = this.isAllowed(date);
+      cells.push(`<button type="button" class="hw-glass-day${active ? ' is-selected' : ''}${date.isSame(today) ? ' is-today' : ''}" data-day="${day}" ${allowed ? '' : 'disabled'} aria-label="${esc(day + ' ' + monthLabel(this.calendar, this.view.month) + ' ' + this.view.year)}"${active ? ' aria-current="date"' : ''}>${day}</button>`);
+    }
+    const trailing = (7 - ((offset + total) % 7)) % 7;
+    for (let day = 1; day <= trailing; day++) cells.push(`<span class="hw-glass-day is-outside" aria-hidden="true">${day}</span>`);
+
+    this.dialog.classList.add('hw-ui-glass');
+    this.dialog.innerHTML = `
+      <div class="hw-glass-accent" aria-hidden="true"></div>
+      <div class="hw-glass-heading">
+        <button type="button" class="hw-glass-nav" data-action="prev" aria-label="${esc(this.messages.previous)}" ${this.canMoveMonth(-1) ? '' : 'disabled'}>‹</button>
+        <div class="hw-glass-title"><button type="button" class="hw-glass-month" data-action="month-selector" aria-haspopup="listbox" aria-expanded="false">${esc(monthLabel(this.calendar, this.view.month))}</button><button type="button" class="hw-glass-year" data-action="year-selector" aria-haspopup="listbox" aria-expanded="false">${this.view.year}</button><div class="hw-selector-panel" data-selector-panel hidden></div></div>
+        <button type="button" class="hw-glass-nav" data-action="next" aria-label="${esc(this.messages.next)}" ${this.canMoveMonth(1) ? '' : 'disabled'}>›</button>
+      </div>
+      <div class="hw-glass-week" dir="ltr">${Array.from({ length: 7 }, (_, index) => `<span>${esc(weekdays[(index + this.options.weekStart) % 7].slice(0, 3))}</span>`).join('')}</div>
+      <div class="hw-glass-days" dir="ltr">${cells.join('')}</div>
+      <div class="hw-message" role="alert" hidden></div>
+      <div class="hw-glass-footer">${this.options.todayButton ? `<button type="button" class="hw-glass-today" data-action="today">${esc(this.messages.today)}</button>` : ''}<button type="button" class="hw-glass-exit" data-action="close">${esc(this.messages.close)}</button></div>`;
+    this.bindDialog();
   }
 
   renderWheelDialog() {
-    const selected = this.value || this.todayValue();
+    if (this.options.variant === 'calendar-card') this.dialog.classList.add('hw-ui-card-wheel');
+    if (this.options.variant === 'calendar-glass') this.dialog.classList.add('hw-ui-glass', 'hw-ui-glass-wheel');
+    const selected = (this.usesDraftSelection() ? this.draftValue : this.value) || this.value || this.todayValue();
     const { min, max } = this.bounds();
     const currentYear = selected.year;
     let minYear = min ? min.year : currentYear - 100;
@@ -431,7 +550,7 @@ export class HewargeDatePicker {
         <div><span class="hw-kicker">${esc(this.messages.kicker)}</span><strong>${esc(this.messages.title)}</strong></div>
         <button type="button" class="hw-close" data-action="close" aria-label="${esc(this.messages.close)}">×</button>
       </div>
-      <div class="hw-wheel-summary"><b>${esc(formatDate(selected,this.options.format))}</b></div>
+      <div class="hw-wheel-summary"><b>${esc(formatDate(selected,this.options.format,{...this.options,locale:this.locale}))}</b></div>
       <div class="hw-wheel" dir="${this.messages.direction}">
         <div class="hw-wheel-column" data-wheel-column="year"><div class="hw-wheel-fade top"></div><div class="hw-wheel-list">${yearItems}</div><div class="hw-wheel-fade bottom"></div></div>
         <div class="hw-wheel-column" data-wheel-column="month"><div class="hw-wheel-fade top"></div><div class="hw-wheel-list">${months.map(m=>item('month',m,monthLabel(this.calendar,m),m===selected.month)).join('')}</div><div class="hw-wheel-fade bottom"></div></div>
@@ -439,8 +558,8 @@ export class HewargeDatePicker {
         <div class="hw-wheel-selection" aria-hidden="true"></div>
       </div>
       <div class="hw-message" role="alert" hidden></div>
-      <div class="hw-footer hw-wheel-footer">
-        <div class="hw-actions">${this.options.todayButton?`<button type="button" class="hw-today" data-action="today">${esc(this.messages.today)}</button>`:''}<button type="button" class="hw-confirm" data-action="confirm-wheel">${esc(this.messages.done)}</button></div>
+      <div class="hw-footer hw-wheel-footer${this.options.variant === 'calendar-glass' ? ' hw-glass-wheel-footer-wrap' : ''}">
+        ${this.options.variant === 'calendar-glass' ? `<div class="hw-glass-wheel-footer"><button type="button" class="hw-today" data-action="today">${esc(this.messages.today)}</button><button type="button" class="hw-confirm" data-action="confirm-wheel">${esc(this.messages.done)}</button></div>` : `<div class="hw-actions">${this.options.todayButton?`<button type="button" class="hw-today" data-action="today">${esc(this.messages.today)}</button>`:''}<button type="button" class="hw-confirm" data-action="confirm-wheel">${esc(this.messages.done)}</button></div>`}
       </div>`;
     this.bindWheelDialog(selected);
   }
@@ -451,10 +570,22 @@ export class HewargeDatePicker {
     this.dialog.querySelector('[data-action="today"]')?.addEventListener('click', () => {
       const today = this.todayValue();
       if (!this.isAllowed(today)) return;
-      this.value = today;
+      if (this.options.variant === 'calendar-card' || this.options.variant === 'calendar-glass') {
+        this.value = today;
+        this.draftValue = today;
+        this.view = { year: today.year, month: today.month };
+        this.syncInput();
+        this.dispatchChange();
+        this.close();
+        return;
+      }
+      if (this.usesDraftSelection()) this.draftValue = today;
+      else this.value = today;
       this.view = { year: today.year, month: today.month };
-      this.syncInput();
-      this.dispatchChange();
+      if (!this.usesDraftSelection()) {
+        this.syncInput();
+        this.dispatchChange();
+      }
       this.renderWheelDialog();
       this.dialog.classList.add('hewarge-picker-open');
     });
@@ -470,6 +601,7 @@ export class HewargeDatePicker {
       // The wheel is an editing surface: all wheel changes are reflected in
       // the picker state immediately, while this button commits the current
       // value to the input and closes the mobile picker.
+      if (this.usesDraftSelection()) this.value = this.draftValue || this.value;
       this.syncInput();
       this.dispatchChange();
       this.close();
@@ -522,6 +654,8 @@ export class HewargeDatePicker {
       event.preventDefault();
       event.stopPropagation();
       const items = [...list.querySelectorAll('.hw-wheel-item')];
+      this.updateWheelPart(type, Number(btn.dataset.value), false);
+      if (type === 'year' || type === 'month') this.refreshWheelDays();
       snapToIndex(items.indexOf(btn));
     }));
   }
@@ -533,7 +667,7 @@ export class HewargeDatePicker {
     }));
   }
 
-  centerWheelSelection(selected = this.value) {
+  centerWheelSelection(selected = (this.usesDraftSelection() ? this.draftValue : null) || this.value) {
     for (const type of ['year','month','day']) {
       const list = this.dialog.querySelector(`[data-wheel-column="${type}"] .hw-wheel-list`);
       if (!list) continue;
@@ -576,9 +710,10 @@ export class HewargeDatePicker {
   }
 
   updateWheelPart(type, value, fromScroll = false) {
-    let year = this.value.year;
-    let month = this.value.month;
-    let day = this.value.day;
+    const current = (this.usesDraftSelection() ? this.draftValue : null) || this.value;
+    let year = current.year;
+    let month = current.month;
+    let day = current.day;
     if (type === 'year') year = value;
     if (type === 'month') month = value;
     if (type === 'day') day = value;
@@ -589,10 +724,13 @@ export class HewargeDatePicker {
       const candidate = HewargeDate.from(this.calendar, year, month, day);
       if (!this.isAllowed(candidate)) return;
 
-      this.value = candidate;
+      if (this.usesDraftSelection()) this.draftValue = candidate;
+      else this.value = candidate;
       this.view = { year, month };
-      this.syncInput();
-      this.dispatchChange();
+      if (!this.usesDraftSelection()) {
+        this.syncInput();
+        this.dispatchChange();
+      }
 
       if (fromScroll && (type === 'year' || type === 'month')) {
         this.refreshWheelDays();
@@ -605,15 +743,17 @@ export class HewargeDatePicker {
     const column = this.dialog?.querySelector('[data-wheel-column="day"]');
     const list = column?.querySelector('.hw-wheel-list');
     if (!list) return;
-    const daysInMonth = HewargeDate.from(this.calendar, this.value.year, this.value.month, 1).daysInMonth;
+    const selected = (this.usesDraftSelection() ? this.draftValue : null) || this.value;
+    const daysInMonth = HewargeDate.from(this.calendar, selected.year, selected.month, 1).daysInMonth;
     const html = Array.from({length:daysInMonth}, (_,i) => {
       const day = i + 1;
-      return `<button type="button" class="hw-wheel-item${day === this.value.day ? ' is-active' : ''}" data-wheel="day" data-value="${day}">${day}</button>`;
+      return `<button type="button" class="hw-wheel-item${day === selected.day ? ' is-active' : ''}" data-wheel="day" data-value="${day}">${day}</button>`;
     }).join('');
     list.innerHTML = html;
     this.bindWheelColumn('day');
     requestAnimationFrame(() => {
-      const active = [...list.querySelectorAll('.hw-wheel-item')].find(x => Number(x.dataset.value) === this.value.day);
+      const current = (this.usesDraftSelection() ? this.draftValue : null) || this.value;
+      const active = [...list.querySelectorAll('.hw-wheel-item')].find(x => Number(x.dataset.value) === current.day);
       if (active) {
         list.scrollTop = active.offsetTop - list.clientHeight / 2 + active.offsetHeight / 2;
         this.markWheelActive('day', active);
@@ -622,7 +762,7 @@ export class HewargeDatePicker {
   }
 
   markCurrentWheelValues() {
-    const selected = this.value;
+    const selected = (this.usesDraftSelection() ? this.draftValue : null) || this.value;
     for (const type of ['year','month','day']) {
       const list = this.dialog.querySelector(`[data-wheel-column="${type}"] .hw-wheel-list`);
       if (!list) continue;
@@ -636,6 +776,7 @@ export class HewargeDatePicker {
     const panel = this.dialog.querySelector('[data-selector-panel]');
     if (!panel) return;
     const isMonth = type === 'month';
+    const usesDraft = this.options.variant === 'calendar-card' || this.usesDraftSelection();
     const { min, max } = this.bounds();
     const items = [];
 
@@ -667,30 +808,38 @@ export class HewargeDatePicker {
     panel.querySelector('[data-action="close-selector"]').addEventListener('click', () => this.closeDesktopSelector());
     panel.querySelectorAll('[data-selector-month]').forEach(button => button.addEventListener('click', () => {
       const month = Number(button.dataset.selectorMonth);
-      this.view.month = month;
       const days = monthStart(this.calendar, this.view.year, month).daysInMonth;
-      const day = Math.min(this.value.day, days);
+      const current = usesDraft ? (this.draftValue || this.value) : this.value;
+      const day = Math.min(current.day, days);
       try {
         const next = HewargeDate.from(this.calendar, this.view.year, month, day);
         if (!this.isAllowed(next)) return;
-        this.value = next;
-        this.syncInput();
-        this.input.dispatchEvent(new CustomEvent('hewarge:change', { bubbles:true, detail:this.detail() }));
+        this.view.month = month;
+        if (usesDraft) this.draftValue = next;
+        else {
+          this.value = next;
+          this.syncInput();
+          this.input.dispatchEvent(new CustomEvent('hewarge:change', { bubbles:true, detail:this.detail() }));
+        }
       } catch { return; }
       this.closeDesktopSelector();
       this.renderDialog();
     }));
     panel.querySelectorAll('[data-selector-year]').forEach(button => button.addEventListener('click', () => {
       const year = Number(button.dataset.selectorYear);
-      this.view.year = year;
       const days = monthStart(this.calendar, year, this.view.month).daysInMonth;
-      const day = Math.min(this.value.day, days);
+      const current = usesDraft ? (this.draftValue || this.value) : this.value;
+      const day = Math.min(current.day, days);
       try {
         const next = HewargeDate.from(this.calendar, year, this.view.month, day);
         if (!this.isAllowed(next)) return;
-        this.value = next;
-        this.syncInput();
-        this.input.dispatchEvent(new CustomEvent('hewarge:change', { bubbles:true, detail:this.detail() }));
+        this.view.year = year;
+        if (usesDraft) this.draftValue = next;
+        else {
+          this.value = next;
+          this.syncInput();
+          this.input.dispatchEvent(new CustomEvent('hewarge:change', { bubbles:true, detail:this.detail() }));
+        }
       } catch { return; }
       this.closeDesktopSelector();
       this.renderDialog();
@@ -713,17 +862,18 @@ export class HewargeDatePicker {
 
   bindDialog() {
     this.dialog.querySelectorAll('[data-day]:not([disabled])').forEach(b => b.addEventListener('click', () => this.select(Number(b.dataset.day))));
-    this.dialog.querySelector('[data-action="close"]').addEventListener('click', () => this.close());
+    this.dialog.querySelectorAll('[data-action="close"]').forEach(button => button.addEventListener('click', () => this.close()));
+    this.dialog.querySelector('[data-action="confirm-glass"]')?.addEventListener('click', () => this.close());
     this.dialog.querySelector('[data-action="confirm-wheel"]')?.addEventListener('click', () => this.close());
     this.backdrop.addEventListener('click', () => this.close());
-    this.dialog.querySelector('[data-action="prev"]').addEventListener('click', () => { if (!this.canMoveMonth(-1)) return; this.view=shiftMonth(this.calendar,this.view.year,this.view.month,-1); this.renderDialog(); });
-    this.dialog.querySelector('[data-action="next"]').addEventListener('click', () => { if (!this.canMoveMonth(1)) return; this.view=shiftMonth(this.calendar,this.view.year,this.view.month,1); this.renderDialog(); });
-    this.dialog.querySelector('[data-action="month-selector"]').addEventListener('click', () => {
+    this.dialog.querySelector('[data-action="prev"]')?.addEventListener('click', () => { if (!this.canMoveMonth(-1)) return; this.view=shiftMonth(this.calendar,this.view.year,this.view.month,-1); this.renderDialog(); });
+    this.dialog.querySelector('[data-action="next"]')?.addEventListener('click', () => { if (!this.canMoveMonth(1)) return; this.view=shiftMonth(this.calendar,this.view.year,this.view.month,1); this.renderDialog(); });
+    this.dialog.querySelector('[data-action="month-selector"]')?.addEventListener('click', () => {
       const panel = this.dialog.querySelector('[data-selector-panel]');
       if (panel?.dataset.open === 'month') this.closeDesktopSelector();
       else this.renderDesktopSelector('month');
     });
-    this.dialog.querySelector('[data-action="year-selector"]').addEventListener('click', () => {
+    this.dialog.querySelector('[data-action="year-selector"]')?.addEventListener('click', () => {
       const panel = this.dialog.querySelector('[data-selector-panel]');
       if (panel?.dataset.open === 'year') this.closeDesktopSelector();
       else this.renderDesktopSelector('year');
@@ -735,6 +885,10 @@ export class HewargeDatePicker {
       this.view={year:today.year,month:today.month};
       this.syncInput();
       this.dispatchChange();
+      if (this.options.variant === 'calendar-card' || this.options.variant === 'calendar-glass') {
+        this.close();
+        return;
+      }
       this.renderDialog();
     });
     this.dialog.querySelector('[data-action="apply-date"]')?.addEventListener('click', () => this.applyManualDate());
@@ -758,8 +912,25 @@ export class HewargeDatePicker {
 
   position() {
     if (!this.dialog || !this.isOpen) return;
+    if (this.options.variant === 'calendar-glass') {
+      const rect = this.input.getBoundingClientRect();
+      const gap = 8;
+      const width = Math.min(380, window.innerWidth - 24);
+      const left = Math.max(12, Math.min(rect.left, window.innerWidth - width - 12));
+      const below = rect.bottom + gap;
+      const above = rect.top - this.dialog.offsetHeight - gap;
+      const top = below + this.dialog.offsetHeight <= window.innerHeight - 12 || above < 12 ? below : above;
+      this.dialog.style.position = 'fixed';
+      this.dialog.style.width = `${width}px`;
+      this.dialog.style.left = `${left}px`;
+      this.dialog.style.top = `${Math.max(12, Math.min(top, window.innerHeight - this.dialog.offsetHeight - 12))}px`;
+      return;
+    }
     if (this.isMobile()) { this.dialog.style.left=''; this.dialog.style.top=''; this.dialog.style.width=''; return; }
-    const r=this.input.getBoundingClientRect(), gap=10, width=Math.min(330,window.innerWidth-24);
+    this.dialog.style.position = 'fixed';
+    const r=this.input.getBoundingClientRect(), gap=10;
+    const preferredWidth = this.options.variant === 'calendar-card' ? 400 : 330;
+    const width=Math.min(preferredWidth,window.innerWidth-24);
     this.dialog.style.width=`${width}px`;
     let left=Math.max(12, Math.min(r.left, window.innerWidth-width-12));
     let top=r.bottom+gap;
@@ -773,6 +944,7 @@ export function createDatePicker(input, options={}) { return new HewargeDatePick
 function numberData(input, name, fallback=null) { const v=input.dataset[name]; return v == null || v === '' ? fallback : Number(v); }
 function optionsFromInput(input, options) {
   const o={ ...options, calendar: input.dataset.calendar || options.calendar || DEFAULTS.calendar, format: input.dataset.format || options.format || DEFAULTS.format, gregorianFormat: input.dataset.gregorianFormat || options.gregorianFormat || DEFAULTS.gregorianFormat };
+  o.variant = input.dataset.variant || input.dataset.ui || options.variant || DEFAULTS.variant;
   if (input.dataset.direction) o.direction=input.dataset.direction;
   if (input.dataset.weekStart != null && input.dataset.weekStart !== '') { const n=Number(input.dataset.weekStart); if(Number.isFinite(n)) o.weekStart=n; }
   for (const key of ['pastYears','futureYears','pastMonths','futureMonths']) { const n=numberData(input,key,null); if(n!==null && Number.isFinite(n)) o[key]=n; }

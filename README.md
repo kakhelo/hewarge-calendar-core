@@ -1,573 +1,365 @@
-# @hewarge/calendar-core
+# Hewarge Calendar Core
 
-A framework-free multi-calendar date engine with an embeddable RTL modal date picker.
+**Framework-free multi-calendar dates, formatting, time-zone conversion, and embeddable date/time pickers.**
 
-Hewarge is designed to be used as a **library**, not as a standalone date-picker page. You connect it to one or more `<input>` elements and the picker opens as a modal when the user focuses or clicks an input.
+[![npm version](https://img.shields.io/npm/v/%40hewarge%2Fcalendar-core)](https://www.npmjs.com/package/@hewarge/calendar-core)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 
-## Features
+Hewarge separates calendar arithmetic from interface code. Use its immutable date API and conversion utilities in any JavaScript environment, or attach accessible, responsive date and time pickers to existing browser inputs. It has no runtime npm dependencies.
 
-- Gregorian (English month names), Kurdish Zayni, legacy Kurdish, Jalali and Hijri calendar support
-- Calendar conversion through a shared JDN-based core
-- Immutable `DateValue` API
-- Date arithmetic and comparisons
-- Framework-free modal date picker
-- Compact, responsive scroll-wheel time picker and combined date-time picker
-- Full minute range (00–59), configurable 12/24-hour format, and optional seconds
-- Developer-configured IANA timezone support, including `Asia/Kurdstan` (`Asia/Baghdad` alias)
-- Current-time and exit actions; timezone-aware timestamp events
-- RTL Kurdish-first UI
-- Empty inputs open on today's date
-- Manual year/month/day editing
-- Today button writes today's date and closes the modal
-- Per-input past/future date restrictions
-- Explicit `minDate` / `maxDate` boundaries
-- Responsive desktop modal and mobile bottom-sheet behavior
-- Backdrop, close button and Escape dismissal
-- Keyboard focus trapping
-- No runtime dependencies
-- Node built-in test runner; Vitest is not required
+## Contents
 
-## Requirements
+- [Highlights](#highlights)
+- [Requirements and installation](#requirements-and-installation)
+- [Quick start](#quick-start)
+- [Supported calendars](#supported-calendars)
+- [Date and time formatting](#date-and-time-formatting)
+- [Date picker](#date-picker)
+- [Time and date-time pickers](#time-and-date-time-pickers)
+- [Time zones and timestamps](#time-zones-and-timestamps)
+- [Custom and native interfaces](#custom-and-native-interfaces)
+- [API exports](#api-exports)
+- [Demo and development](#demo-and-development)
+- [Testing](#testing)
+- [Documentation](#documentation)
+- [Contributing](#contributing)
+- [License](#license)
 
-- Node.js 18+ for the package development/test environment
-- A modern browser for the date-picker UI
+## Highlights
 
-The published package has no runtime npm dependencies.
+- Five calendar systems: Gregorian, Kurdish, Kurdish Zayni, Jalali, and Hijri.
+- JDN-based calendar conversion and immutable `DateValue` operations.
+- Localized formatting, parsing, numeral systems, and extensive date/time tokens.
+- Independent, embeddable date, time-only, and combined date-time pickers.
+- Three date-picker designs and three time-picker designs, selectable per instance.
+- Date boundaries and relative past/future restrictions.
+- Gregorian `YYYY-MM-DD` storage values for dates displayed in another calendar.
+- IANA time-zone conversion, millisecond or second timestamps, and daylight-saving validation.
+- RTL/LTR-aware picker localization, keyboard support, responsive layouts, and dark-mode styling.
+- UI-independent date picker controller for custom web, native, or framework interfaces.
+- TypeScript declarations and zero runtime npm dependencies.
 
-## Install
+## Requirements and installation
+
+Install the published package:
 
 ```bash
 npm install @hewarge/calendar-core
 ```
 
-## Quick start: Date Picker
+The library is an ES module. The date/time picker UI runs in a modern browser; the core and formatting APIs can also be used without the DOM. Node.js 18 or newer is recommended for the repository's development scripts and tests.
 
-HTML:
+## Quick start
+
+### Date picker
 
 ```html
-<input
-  id="birthDate"
-  type="text"
-  placeholder="بەروار هەڵبژێرە"
-  autocomplete="off"
->
+<input id="appointment-date" type="text" autocomplete="off">
 ```
-
-JavaScript:
 
 ```js
 import { createDatePicker } from '@hewarge/calendar-core/picker';
 import '@hewarge/calendar-core/picker/css';
 
-const input = document.querySelector('#birthDate');
-
+const input = document.querySelector('#appointment-date');
 const picker = createDatePicker(input, {
   calendar: 'kurdish',
-  format: 'YYYY/MM/DD'
+  format: 'DD/MM/YYYY'
 });
 
-input.addEventListener('hewarge:change', (event) => {
-  console.log(event.detail.date);
-  console.log(event.detail.gregorian);
+input.addEventListener('hewarge:change', ({ detail }) => {
+  console.log(detail.value);        // Date shown in the selected calendar
+  console.log(detail.storageValue); // Canonical Gregorian YYYY-MM-DD
 });
 ```
 
-The picker is attached to the input. It does **not** navigate to another page.
+The picker attaches to the input; it does not navigate away or render a separate page. Import the CSS entry point once in your browser application.
 
-## Date and Time Formatting Engine
-
-The core provides a framework-independent formatting engine shared by the Date Picker and Time Picker.
+### Core date API
 
 ```js
+import { HewargeDate } from '@hewarge/calendar-core';
+
+const date = HewargeDate.fromGregorian(2026, 9, 7);
+const kurdishDate = date.toKurdish();
+
+console.log(kurdishDate); // { year: 2726, month: 6, day: 16 }
+console.log(date.convert('jalali').toObjectDate());
+console.log(date.add({ days: 10 }).format('YYYY-MM-DD'));
+```
+
+`HewargeDate` is the factory for immutable `DateValue` instances. Calendar conversion, arithmetic, comparison, boundary, metadata, and serialization methods are available on each value.
+
+## Supported calendars
+
+| Calendar ID | Calendar behavior | Picker language and direction |
+|---|---|---|
+| `gregorian` | Gregorian arithmetic | English, LTR |
+| `kurdish` | Legacy Kurdish calendar with its existing 2726-based year convention | Kurdish, RTL |
+| `kurdish-zayni` | Gregorian date arithmetic with Kurdish month names | Kurdish, RTL |
+| `jalali` | Jalali/Persian calendar | Persian, RTL |
+| `hijri` | Implemented arithmetic/civil Hijri calendar | Arabic, RTL |
+
+Create calendar values with `HewargeDate.from(calendar, year, month, day)` or the specific factories `fromGregorian()`, `fromKurdish()`, `fromKurdishZayni()`, `fromJalali()`, and `fromHijri()`. The registry can list, resolve, and register calendar engines; see [docs/API.md](./docs/API.md).
+
+> Hijri dates use the package's arithmetic/civil algorithm and should not be treated as a local moon-sighting declaration.
+
+## Date and time formatting
+
+The formatting API is available from the package root or the dedicated formatting entry point:
+
+```js
+import { HewargeDate } from '@hewarge/calendar-core';
 import {
-  HewargeDate,
   formatDate,
   formatTime,
   formatDateTime,
   parseDate,
   parseTime
-} from '@hewarge/calendar-core';
+} from '@hewarge/calendar-core/formatting';
 
-formatDate(HewargeDate.fromKurdish(2726, 6, 16), 'D MMMM YYYY', {
+const date = HewargeDate.fromKurdish(2726, 6, 16);
+console.log(formatDate(date, 'D MMMM YYYY', {
   calendar: 'kurdish', locale: 'ku-SO', numberingSystem: 'latn'
+}));
+
+console.log(formatTime({ hour: 8, minute: 5, second: 9 }, 'hh:mm:ss A'));
+const parsed = parseDate('16/06/2726', 'DD/MM/YYYY', { calendar: 'kurdish' });
+```
+
+Locales include Kurdish (`ku`, `ku-SO`, `ku-KMR`), Persian (`fa`), English (`en`), and Arabic (`ar`). Numbering systems include Latin (`latn`), Persian (`fa`/`persian`), and Arabic-Indic (`arab`/`arabicIndic`). Calendar arithmetic, locale names, and numeral display can be configured independently.
+
+Common tokens include:
+
+| Tokens | Meaning |
+|---|---|
+| `Y`, `YY`, `YYYY` | Year |
+| `M`, `MM`, `MMM`, `MMMM`, `MMMMM` | Numeric, padded, abbreviated, full, or narrow month |
+| `D`, `DD`, `DDD`, `DDDD` | Day of month or day of year |
+| `d`, `dd`, `ddd`, `dddd` | Numeric or localized weekday |
+| `w`, `ww`, `W`, `WW` | Calendar or ISO week |
+| `H`/`HH`, `h`/`hh`, `k`/`kk` | 24-hour, 12-hour, or 1–24-hour clock |
+| `m`/`mm`, `s`/`ss`, `S`/`SS`/`SSS` | Minute, second, and millisecond |
+| `A`, `a` | Localized AM/PM marker |
+| `Z`, `ZZ`, `z`, `zz` | UTC offset, short time-zone name, or IANA identifier |
+
+Wrap literal text in brackets, for example `[Day] D [of] MMMM YYYY`. Parsing validates supported values; formats that omit required fields cannot reconstruct a complete date or time. For full token, preset, and parsing details, see [docs/FORMATTING.md](./docs/FORMATTING.md).
+
+## Date picker
+
+### Options and variants
+
+```js
+const picker = createDatePicker(input, {
+  calendar: 'kurdish',
+  format: 'DD/MM/YYYY',
+  variant: 'default',       // default | calendar-card | calendar-glass
+  mobileMode: 'auto',       // auto | wheel | calendar
+  weekStart: 6,             // 0=Sunday ... 6=Saturday
+  minDate: { year: 2726, month: 1, day: 1 },
+  maxDate: { year: 2727, month: 12, day: 29 }
 });
-// 16 خەرمانان 2726
-
-formatTime(
-  { hour: 8, minute: 5, second: 9, millisecond: 123 },
-  'hh:mm:ss.SSS A',
-  { locale: 'en', numberingSystem: 'latn', timeZone: 'UTC' }
-);
-// 08:05:09.123 AM
-
-formatDateTime(
-  { calendar: 'gregorian', year: 2026, month: 9, day: 7, hour: 8, minute: 5 },
-  'YYYY-MM-DDTHH:mm:ssZ',
-  { timeZone: 'UTC' }
-);
 ```
 
-A dedicated formatting entry point is also available:
+`default`, `calendar-card`, and `calendar-glass` can be mixed on the same page. On narrow screens, the picker can use a touch-friendly wheel; set `mobileMode` to `calendar` to keep the calendar grid or `wheel` to force the wheel. The default `auto` mode selects the wheel below 600px.
 
-```js
-import { formatDate, formatTime, getAvailableDateTokens } from '@hewarge/calendar-core/formatting';
-```
+Additional range options include `direction: 'past' | 'future' | 'both'`, `pastYears`, `futureYears`, `pastMonths`, and `futureMonths`. `minDate` and `maxDate` use the selected calendar. See the [complete option declarations](./src/picker/index.d.ts) and [date picker guide](./docs/DATE-PICKER.md).
 
-Supported locales include `ku-SO`, `ku-KMR`, `fa`, `en`, and `ar`. Numeral systems can be selected independently as `latn`, `fa`/`persian`, or `arab`/`arabicIndic`.
+### Gregorian storage and form submission
 
-| Category | Tokens | Meaning |
-|---|---|---|
-| Year | `Y`, `YY`, `YYYY` | Full, two-digit, and padded four-digit year |
-| Month | `M`, `MM`, `MMM`, `MMMM`, `MMMMM` | Numeric, abbreviated, full, and narrow localized month |
-| Day | `D`, `DD` | Day with or without padding |
-| Day of year | `DDD`, `DDDD` | Day number with optional three-digit padding |
-| Weekday | `d`, `dd`, `ddd`, `dddd` | Numeric, narrow, abbreviated, and full weekday |
-| Calendar/ISO week | `w`/`ww`, `W`/`WW` | Calendar-specific or ISO-8601 week number |
-| Hour | `H`/`HH`, `h`/`hh`, `k`/`kk` | 24-hour, 12-hour, or 1–24-hour clock |
-| Minute/second | `m`/`mm`, `s`/`ss` | Minute and second with optional padding |
-| Millisecond | `S`, `SS`, `SSS` | One, two, or three millisecond digits |
-| Meridiem | `A`, `a` | Uppercase/lowercase localized AM/PM |
-| Timezone | `Z`, `ZZ`, `z`, `zz` | UTC offset, short runtime name, or IANA identifier |
-
-Literal text can be wrapped in brackets: `[Day] D [of] MMMM YYYY`. Backslash escaping is also supported.
-
-```js
-parseDate('16/06/2726', 'DD/MM/YYYY', { calendar: 'kurdish', locale: 'ku-SO' });
-parseTime('12:05 PM', 'hh:mm A', { locale: 'en' });
-```
-
-Parsing validates calendar dates and time fields and rejects invalid values. Formats that omit required fields cannot reconstruct the complete original value. Complete details are in [docs/FORMATTING.md](./docs/FORMATTING.md).
-
-## Time Picker and Date-Time Picker
+The visible date follows the selected calendar, while `detail.storageValue` and `detail.gregorianValue` provide the corresponding Gregorian `YYYY-MM-DD` value. To submit that canonical value in a form, connect a hidden field:
 
 ```html
-<input id="appointmentDate" type="text" autocomplete="off">
-<input id="appointmentTime" type="text" autocomplete="off">
+<input id="date-display" type="text" autocomplete="off">
+<input id="date-storage" type="hidden" name="appointment_date">
 ```
 
 ```js
-import { createDateTimePicker, createTimePicker } from '@hewarge/calendar-core/picker';
-import '@hewarge/calendar-core/picker/css';
-
-const appointment = createDateTimePicker(
-  document.querySelector('#appointmentDate'),
-  document.querySelector('#appointmentTime'),
-  {
-    calendar: 'kurdish',
-    time: { format: '12', timeZone: 'Asia/Kurdstan', showSeconds: false }
-  }
-);
-
-document.querySelector('#appointmentTime').addEventListener('hewarge:datetimechange', event => {
-  console.log(event.detail.dateTime);  // calendar date and 24-hour time fields
-  console.log(event.detail.timeZone);  // Asia/Kurdstan
-  console.log(event.detail.timestamp); // epoch milliseconds; null on a DST gap
-});
-
-// For time-only controls:
-const clock = createTimePicker(document.querySelector('#clock'), {
-  format: '24',
-  timeZone: 'UTC',
-  showSeconds: true
+createDatePicker(document.querySelector('#date-display'), {
+  calendar: 'kurdish',
+  storageInput: '#date-storage'
 });
 ```
 
-The compact time picker adapts to desktop and mobile and uses scroll-wheel columns. The minute wheel always includes all 60 values (`00`–`59`). If the input is empty, it opens at the current time in the configured timezone. The timezone is selected by the developer through `timeZone`; the picker itself does not let end users change it. Any IANA timezone supported by the browser runtime can be used. `Asia/Kurdstan` is an application alias for `Asia/Baghdad`.
+Alternatively, `storageName: 'appointment_date'` creates a hidden field, or `autoStorage: true` derives its name from the visible input. The [Gregorian database contract](./docs/GREGORIAN-DATABASE.md) documents the behavior and conversion helpers.
 
-Time values are stored internally as 24-hour fields. Set `format: '12'` or `'24'` for the input display, and set `showSeconds` to include or omit the seconds wheel. The footer's **Current time** action selects the current time in the configured timezone; **Exit** commits and closes the picker. For an existing picker, `clock.setTimeZone('Asia/Kurdstan')`, `clock.setFormat('12')`, and `clock.setShowSeconds(false)` update its configuration.
-
-The time picker fires `hewarge:timechange` (and `hewarge:change`) after confirmation. The combined picker additionally fires `hewarge:datetimechange` with the selected calendar date/time, `timeZone`, and a Unix timestamp in milliseconds. Nonexistent local times during daylight-saving transitions include `timestamp: null` and a `validationError`.
-
-## Auto-attach multiple inputs
+### Auto-attach multiple inputs
 
 ```html
-<input
-  data-hewarge-datepicker
-  data-calendar="kurdish"
-  data-format="YYYY/MM/DD"
->
-
-<input
-  data-hewarge-datepicker
-  data-calendar="gregorian"
-  data-format="YYYY-MM-DD"
->
+<input data-hewarge-datepicker data-calendar="kurdish" data-format="DD/MM/YYYY">
+<input data-hewarge-datepicker data-calendar="gregorian" data-format="YYYY-MM-DD">
 ```
 
 ```js
 import { attachDatePickers } from '@hewarge/calendar-core/picker';
 import '@hewarge/calendar-core/picker/css';
 
-attachDatePickers(document);
+const instances = attachDatePickers(document);
 ```
 
-## Date restrictions
+Use `attachDatePickers(root, { selector: '.my-date-input' })` to provide a custom selector. Per-input `data-*` settings can override picker options.
 
-Each input can have its own allowed range.
+### Events and lifecycle
 
-### Only past dates
+`hewarge:change` fires when a date is committed. Its detail includes the visible `value`, canonical `storageValue`/`gregorianValue`, selected calendar fields, and conversions to the supported calendars. `hewarge:clear` fires when the value is cleared.
 
 ```js
-createDatePicker(input, {
-  calendar: 'kurdish',
-  direction: 'past',
-  pastMonths: 6
-});
+picker.open();
+picker.setCalendar('jalali');
+picker.close();
+picker.destroy();
 ```
 
-### Only future dates
+The picker also supports keyboard interaction, focus containment, Escape dismissal, and disabled dates outside configured bounds.
 
-```js
-createDatePicker(input, {
-  calendar: 'kurdish',
-  direction: 'future',
-  futureYears: 2
-});
-```
+## Time and date-time pickers
 
-### Exact boundaries
-
-```js
-createDatePicker(input, {
-  calendar: 'kurdish',
-  minDate: { year: 2726, month: 1, day: 1 },
-  maxDate: { year: 2727, month: 12, day: 29 }
-});
-```
-
-`direction` accepts `both`, `past`, or `future`.
-
-## Date Picker options
-
-| Option | Type | Default | Description |
-|---|---|---:|---|
-| `calendar` | string | `kurdish` | Calendar used by the input/picker |
-| `locale` | string | `ku` | Retained for compatibility; the active calendar determines the picker language and direction |
-| `format` | string | `YYYY/MM/DD` | Input display format |
-| `weekStart` | number | `6` | First weekday index: `0`=Sunday … `6`=Saturday |
-| `closeOnSelect` | boolean | `true` | Close after selecting a day |
-| `clearable` | boolean | `true` | Show Clear action |
-| `todayButton` | boolean | `true` | Show Today action |
-| `keyboard` | boolean | `true` | Enable input keyboard handling |
-| `inputValue` | boolean | `true` | Write selected value into the input |
-| `direction` | `both \| past \| future` | `both` | Allowed side of today |
-| `pastYears` | number \| null | `null` | Past range in years |
-| `futureYears` | number \| null | `null` | Future range in years |
-| `pastMonths` | number \| null | `null` | Past range in months |
-| `futureMonths` | number \| null | `null` | Future range in months |
-| `minDate` | object \| null | `null` | Explicit minimum `{year,month,day}` |
-| `maxDate` | object \| null | `null` | Explicit maximum `{year,month,day}` |
-
-Explicit `minDate` and `maxDate` are interpreted in the configured calendar.
-
-## HTML data attributes
-
-The auto-attach API maps options to `data-*` attributes. For example:
+### Time-only picker
 
 ```html
-<input
-  data-hewarge-datepicker
-  data-calendar="kurdish"
-  data-format="YYYY/MM/DD"
-  data-direction="future"
-  data-future-years="1"
->
+<input id="meeting-time" type="text" autocomplete="off">
 ```
 
-## Events
-
-### `hewarge:change`
-
-Fired after a valid date is selected or the Today action is used.
-
 ```js
-input.addEventListener('hewarge:change', (event) => {
-  const detail = event.detail;
+import { createTimePicker } from '@hewarge/calendar-core/picker';
+import '@hewarge/calendar-core/picker/css';
 
-  console.log(detail.calendar);
-  console.log(detail.date);
-  console.log(detail.gregorian);
-  console.log(detail.jalali);
-  console.log(detail.kurdish);
-  console.log(detail.kurdishZayni);
-  console.log(detail.hijri);
+const clock = createTimePicker(document.querySelector('#meeting-time'), {
+  variant: 'ios-wheel', // default | analog-clock | ios-wheel
+  format: '12',         // 12 | 24
+  timeZone: 'Europe/London',
+  showSeconds: false,
+  keyboard: true
 });
 ```
 
-### `hewarge:clear`
+Time picker variants are the standard scroll wheel, analog clock, and iOS-style wheel. The time zone is configured by the developer, not selected by the user. An empty input opens at the current time in the configured zone. Use `setFormat()`, `setVariant()`, `setTimeZone()`, `setShowSeconds()`, or `setTime()` to update a picker instance.
 
-Fired when the user clears the input.
+The committed time fires `hewarge:timechange` and `hewarge:change`. The detail includes hour, minute, second, display `value`, `format`, and `timeZone`.
+
+### Combined date and time
+
+```html
+<input id="appointment-date" type="text" autocomplete="off">
+<input id="appointment-time" type="text" autocomplete="off">
+```
 
 ```js
-input.addEventListener('hewarge:clear', (event) => {
-  console.log(event.detail.calendar);
+import { createDateTimePicker } from '@hewarge/calendar-core/picker';
+import '@hewarge/calendar-core/picker/css';
+
+const appointment = createDateTimePicker(
+  document.querySelector('#appointment-date'),
+  document.querySelector('#appointment-time'),
+  {
+    calendar: 'kurdish',
+    date: { format: 'YYYY/MM/DD', variant: 'calendar-glass' },
+    time: { format: '12', variant: 'ios-wheel', timeZone: 'Asia/Baghdad' }
+  }
+);
+
+document.querySelector('#appointment-time').addEventListener('hewarge:datetimechange', ({ detail }) => {
+  console.log(detail.dateTime);  // Selected calendar date and 24-hour time fields
+  console.log(detail.timeZone);
+  console.log(detail.timestamp); // Unix milliseconds, or null for a DST gap
 });
 ```
 
-## Date Core API
+The combined picker supports `setCalendar()`, `setTimeFormat()`, `setTimeVariant()`, `setTimeZone()`, and `destroy()`. The emitted `datetimechange` detail includes a validation error when the selected wall-clock time cannot represent an instant.
 
-```js
-import { HewargeDate } from '@hewarge/calendar-core';
+## Time zones and timestamps
 
-const date = HewargeDate.fromGregorian(2026, 9, 7);
-
-console.log(date.toKurdish());
-// { year: 2726, month: 6, day: 16 }
-
-console.log(date.convert('kurdish-zayni').toObjectDate());
-// { year: 2026, month: 9, day: 7 } — same date as Gregorian, with Kurdish month names in the picker
-
-console.log(date.toJalali());
-// { year: 1405, month: 6, day: 16 }
-```
-
-### Create dates
-
-```js
-HewargeDate.from('kurdish', 2726, 6, 16);
-HewargeDate.fromGregorian(2026, 9, 7);
-HewargeDate.fromJalali(1405, 6, 16);
-HewargeDate.fromKurdish(2726, 6, 16);
-HewargeDate.fromHijri(1448, 3, 24);
-HewargeDate.today();
-```
-
-### Convert
-
-```js
-const date = HewargeDate.fromGregorian(2026, 9, 7);
-
-const kurdish = date.convert('kurdish');
-const jalali = date.convert('jalali');
-const hijri = date.convert('hijri');
-```
-
-### Date operations
-
-All operations return a new immutable date value.
-
-```js
-date.add({ days: 10 });
-date.add({ weeks: 2 });
-date.add({ months: 1 });
-date.add({ years: 1 });
-date.subtract({ days: 3 });
-
-date.isBefore(other);
-date.isAfter(other);
-date.isSame(other);
-date.equals(other);
-
-date.startOf('month');
-date.endOf('month');
-date.startOf('year');
-date.endOf('year');
-```
-
-### Date metadata
-
-```js
-date.dayOfWeek;
-date.dayOfYear;
-date.daysInMonth;
-date.isLeapYear;
-date.toJdn();
-```
-
-### Timestamp and time-zone conversion
-
-Convert between Unix timestamps and calendar date-times, including seconds, milliseconds, and an IANA time zone. Timestamp values use milliseconds by default; set `unit` to `'seconds'` (or `'s'`) or `'milliseconds'` (or `'ms'`). The time zone defaults to `UTC`.
+The core exports `dateTimeToTimestamp()`, `timestampToDateTime()`, and `normalizeTimeZone()`:
 
 ```js
 import { dateTimeToTimestamp, timestampToDateTime } from '@hewarge/calendar-core';
 
 const timestamp = dateTimeToTimestamp({
-  calendar: 'kurdish',
-  year: 2726, month: 6, day: 16,
+  calendar: 'kurdish', year: 2726, month: 6, day: 16,
   hour: 12, minute: 34, second: 56, millisecond: 789
-}, {
-  unit: 'milliseconds',
-  timeZone: 'America/New_York'
-});
+}, { timeZone: 'America/New_York', unit: 'milliseconds' });
 
-const dateTime = timestampToDateTime(timestamp, {
-  unit: 'milliseconds',
-  timeZone: 'America/New_York',
-  calendar: 'kurdish'
+const local = timestampToDateTime(timestamp, {
+  timeZone: 'America/New_York', calendar: 'kurdish'
 });
-
-console.log(dateTime.date.format('YYYY/MM/DD'));
-// 2726/06/16
-console.log(dateTime.hour, dateTime.minute, dateTime.second, dateTime.millisecond);
-// 12 34 56 789
 ```
 
-`dateTimeToTimestamp()` accepts a `DateValue` or an object containing `year`, `month`, `day`, optional `calendar`, and optional time fields (`hour`, `minute`, `second`, `millisecond`). `timestampToDateTime()` returns the converted calendar fields, time fields, selected `timeZone`, and the corresponding `DateValue` in its `date` property. A local time skipped by a daylight-saving transition throws a `RangeError`; for an ambiguous repeated time, the earlier instant is selected.
+Timestamps default to milliseconds; `unit: 'seconds'` or `'s'` uses Unix seconds. Time zones accept `UTC` and runtime-supported IANA names. `Asia/Kurdstan` is normalized to `Asia/Baghdad`. A nonexistent local wall-clock time during a daylight-saving transition is rejected by `dateTimeToTimestamp()`; an ambiguous repeated time resolves to the earlier matching instant. See [docs/API.md](./docs/API.md) for return values and details.
 
-The interactive demo at `npm run dev` also includes a timestamp conversion panel, a live round-trip test, and a button to verify date-time round trips for all five calendars.
+## Custom and native interfaces
 
-## Calendar IDs
-
-```text
-kurdish
-kurdish-zayni
-jalali
-gregorian
-hijri
-```
-
-## Calendar languages
-
-The picker automatically localizes its interface from the selected calendar; no separate locale setting is required:
-
-- `kurdish` and `kurdish-zayni`: Kurdish month and weekday names, controls, labels, and right-to-left layout. The legacy `kurdish` calendar retains its existing 2726-based date calculation. `kurdish-zayni` uses Gregorian date arithmetic with Kurdish month names.
-- `jalali`: Persian names and interface text with right-to-left layout.
-- `hijri`: Arabic month and weekday names and interface text with right-to-left layout.
-- `gregorian`: English month and weekday names and interface text with left-to-right layout.
-
-Localization covers picker headings, today/confirm/close buttons, previous/next month labels, month/year selectors, validation messages, weekday headings, and the bundled demo's date-input label and placeholder. Switching the calendar also switches the interface language:
+Use `createDatePickerController()` when you need calendar state and behavior without the bundled DOM picker:
 
 ```js
-picker.setCalendar('jalali');    // Persian UI
-picker.setCalendar('hijri');     // Arabic UI
-picker.setCalendar('gregorian'); // English UI
+import { createDatePickerController } from '@hewarge/calendar-core/picker';
+
+const model = createDatePickerController({
+  calendar: 'kurdish',
+  format: 'DD/MM/YYYY',
+  minDate: { year: 2726, month: 1, day: 1 }
+});
+
+const state = model.getState();
+const unsubscribe = model.subscribe(({ type, state }) => {
+  // Render state.value, state.days, state.monthLabel, and allowed flags.
+});
+
+model.navigate(1);
+model.select(16);
+model.setCalendar('jalali');
+unsubscribe();
 ```
 
-## Package exports
+Each controller owns its value, visible month, calendar, and date-range rules. It exposes state, navigation, selection, range checks, `goToToday()`, `clear()`, and subscriptions without requiring `document` or `window`. Consult [docs/DATE-PICKER.md](./docs/DATE-PICKER.md#custom-and-native-interfaces) for the full state and notification contract.
 
-```text
-@hewarge/calendar-core
-@hewarge/calendar-core/picker
-@hewarge/calendar-core/picker/css
+## API exports
+
+| Import path | Contents |
+|---|---|
+| `@hewarge/calendar-core` | `HewargeDate`, `DateValue`, calendar registry, conversions, timestamp helpers, errors, formatting exports |
+| `@hewarge/calendar-core/formatting` | Date/time formatting and parsing, locales, numeral helpers, tokens, presets |
+| `@hewarge/calendar-core/picker` | Date/time/date-time pickers, date picker controller, picker helpers |
+| `@hewarge/calendar-core/picker/css` | Bundled picker styles |
+
+TypeScript declarations are included for the root, formatting, and picker APIs. See [src/index.d.ts](./src/index.d.ts), [src/formatting/index.d.ts](./src/formatting/index.d.ts), and [src/picker/index.d.ts](./src/picker/index.d.ts).
+
+## Demo and development
+
+Clone the repository, install dependencies if needed, and start the interactive local demo:
+
+```bash
+npm install
+npm run dev
 ```
 
-The core export contains the calendar/date and formatting APIs. The picker export contains the embeddable modal UI API. The formatting export contains the UI-independent formatting and parsing APIs. The CSS export contains the picker styles.
+Open the address printed by the server (by default, `http://localhost:5177`). The demo includes all picker variants, calendar selection, date/time formatting, and timestamp round-trip tools.
 
 ## Testing
 
-This project uses Node's built-in test runner, so Vitest is not required to run the package tests.
+Run the test suite with Node's built-in test runner:
 
 ```bash
 npm test
 ```
 
-## Local demo
+The tests cover calendar conversion and arithmetic, formatting and parsing, picker exports and controller behavior, timestamp units, time zones, and daylight-saving edge cases.
 
-```bash
-npm run dev
-```
+## Documentation
 
-Then open:
+- [Core API reference](./docs/API.md)
+- [Date, time, and date-time pickers](./docs/DATE-PICKER.md)
+- [Formatting tokens and parsing](./docs/FORMATTING.md)
+- [Gregorian database/storage contract](./docs/GREGORIAN-DATABASE.md)
+- [Architecture](./docs/ARCHITECTURE.md)
+- [Publishing guide](./docs/PUBLISHING.md)
+- [Release checklist](./docs/RELEASE-CHECKLIST.md)
+- [Changelog](./CHANGELOG.md)
+- [Basic example](./examples/basic.mjs)
 
-```text
-http://localhost:5177
-```
+## Contributing
 
-## Publishing
-
-Before the first publish:
-
-```bash
-npm login
-npm whoami
-npm pack --dry-run
-npm publish --access public
-```
-
-`@hewarge/calendar-core` is a scoped package. Scoped public packages need `--access public` on their initial direct publish. See `docs/PUBLISHING.md` for the complete checklist.
+Contributions and bug reports are welcome. Before opening a pull request, run `npm test` and describe the affected API or UI behavior. Public API changes should also update the relevant TypeScript declarations and documentation.
 
 ## License
 
-MIT
-
-## Database-safe Gregorian output
-
-The Date Picker separates **display value** from **storage value**. The selected calendar controls what the user sees in the visible input, while the canonical value exposed to the application is always Gregorian `YYYY-MM-DD`.
-
-For example, with the Kurdish calendar:
-
-```text
-Visible input: 16/6/2726
-Storage/API:   2026-09-07
-```
-
-The change event exposes both values:
-
-```js
-input.addEventListener('hewarge:change', (event) => {
-  console.log(event.detail.value);        // 16/6/2726
-  console.log(event.detail.storageValue);  // 2026-09-07
-  console.log(event.detail.gregorianValue); // 2026-09-07
-  console.log(event.detail.kurdish.year);  // 2726
-});
-```
-
-For direct form submission, use a hidden storage input:
-
-```html
-<input id="birth-display" data-hewarge-datepicker name="birth_display">
-<input id="birth-storage" type="hidden" name="birth_date">
-```
-
-```js
-createDatePicker(document.querySelector('#birth-display'), {
-  calendar: 'kurdish',
-  storageInput: '#birth-storage'
-});
-```
-
-The hidden field receives `2026-09-07`, while the visible input keeps the Kurdish date. You can also use `storageName: 'birth_date'` to let the picker create the hidden field automatically, or `autoStorage: true` when the visible input already has a `name`.
-
-## Mobile Wheel Date Picker
-
-On screens up to 600px, the default UI becomes a touch-first bottom-sheet Wheel Date Picker with separate year, month and day wheels. The desktop UI remains a calendar/grid picker.
-
-You can force a mode with:
-
-```js
-createDatePicker(input, {
-  calendar: 'kurdish',
-  mobileMode: 'wheel'
-});
-```
-
-Available values are `auto`, `wheel`, and `calendar`.
-
-## Converting a Gregorian database value
-
-If a database returns `2026-09-07`, pass it directly to the dedicated conversion function you need:
-
-```js
-import {
-  gregorianToKurdish,
-  gregorianToJalali,
-  gregorianToHijri
-} from '@hewarge/calendar-core';
-
-const dbDate = '2026-09-07';
-
-const kurdish = gregorianToKurdish(dbDate);
-const jalali = gregorianToJalali(dbDate);
-const hijri = gregorianToHijri(dbDate);
-
-console.log(kurdish.year);        // 2726
-console.log(kurdish.month);       // 6
-console.log(kurdish.day);         // 16
-console.log(kurdish.dayMonthYear); // 16/6/2726
-```
-
-Each conversion result contains both separate fields and ready-to-use strings:
-
-```js
-result.year
-result.month
-result.day
-result.yearMonthDay
-result.yearMonthDayPadded
-result.dayMonthYear
-result.dayMonthYearPadded
-```
-
-The conversion helpers also accept a JavaScript `Date` or `{ year, month, day }` Gregorian object.
-
-> Hijri conversion in this package is the implemented arithmetic/civil Hijri algorithm. It should not be treated as a local moon-sighting declaration.
+This project is distributed under the [MIT License](./LICENSE).

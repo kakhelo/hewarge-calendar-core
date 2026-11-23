@@ -1,4 +1,4 @@
-import { createDatePicker, createDateTimePicker, formatTime, parseTime } from '../../src/picker/index.js';
+import { createDatePicker, createTimePicker, createDateTimePicker, formatTime, parseTime } from '../../src/picker/index.js';
 import { dateTimeToTimestamp, timestampToDateTime, formatDate } from '../../src/index.js';
 
 const input = document.querySelector('#main-date');
@@ -28,6 +28,36 @@ function render(detail){
 }
 input.addEventListener('hewarge:change', e => render(e.detail));
 input.addEventListener('hewarge:clear', () => { gregorian.textContent='—'; calendarName.textContent='—'; display.textContent='—'; json.textContent='—'; });
+
+const pickerVariantInputs = [
+  { id: 'variant-date-default', variant: 'default' },
+  { id: 'variant-date-card', variant: 'calendar-card' },
+  { id: 'variant-date-glass', variant: 'calendar-glass' }
+];
+for (const { id, variant } of pickerVariantInputs) {
+  const field = document.getElementById(id);
+  const result = document.getElementById(`${id}-result`);
+  createDatePicker(field, { calendar: 'kurdish', locale: 'en', format: 'YYYY-MM-DD', variant, mobileMode: 'auto' });
+  field.addEventListener('hewarge:change', event => {
+    result.textContent = `${event.detail.value} · Gregorian ISO: ${event.detail.storageValue}`;
+    result.dataset.state = 'changed';
+  });
+}
+
+const timeVariantInputs = [
+  { id: 'variant-time-default', variant: 'default', format: '24' },
+  { id: 'variant-time-analog', variant: 'analog-clock', format: '24' },
+  { id: 'variant-time-ios', variant: 'ios-wheel', format: '24' }
+];
+for (const { id, variant, format } of timeVariantInputs) {
+  const field = document.getElementById(id);
+  const result = document.getElementById(`${id}-result`);
+  createTimePicker(field, { variant, format, timeZone: 'Asia/Tehran', showSeconds: false });
+  field.addEventListener('hewarge:timechange', event => {
+    result.textContent = `${event.detail.value} · ${event.detail.timeZone}`;
+    result.dataset.state = 'changed';
+  });
+}
 
 const mainDateFormat=document.querySelector('#main-date-format');
 const mainDateLocale=document.querySelector('#main-date-locale');

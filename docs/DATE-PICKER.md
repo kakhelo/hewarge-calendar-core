@@ -40,15 +40,64 @@ const clock = createTimePicker(document.querySelector('#time'), {
   timeZone: 'Europe/London',
   showSeconds: false
 });
+
+const analogClock = createTimePicker(document.querySelector('#analog-time'), {
+  variant: 'analog-clock',
+  format: '12',
+  timeZone: 'Europe/London'
+});
+
+const iosWheel = createTimePicker(document.querySelector('#ios-time'), {
+  variant: 'ios-wheel',
+  format: '12',
+  timeZone: 'Europe/London'
+});
 ```
 
-On opening, the picker shows the current time in its configured timezone if the input is empty. The **Current time** footer button resets the wheel to the current time in that same zone; **Exit** commits the selected time and closes the picker. The time picker fires `hewarge:timechange` (and `hewarge:change`) after confirmation. The composed date-time picker also fires `hewarge:datetimechange`, whose detail includes `dateTime`, `timeZone`, and a millisecond `timestamp`. Any runtime-supported IANA timezone may be configured by the developer; the UI has no timezone selector. `Asia/Kurdstan` is normalized to `Asia/Baghdad`. Nonexistent wall-clock times during a daylight-saving transition are reported through `validationError` and have a `null` timestamp.
+The time picker supports `variant: 'default'` (the existing wheel interface), `variant: 'analog-clock'` (analog dial), and `variant: 'ios-wheel'` (center-highlighted scroll wheels with Cancel and Apply). Variants are selected per instance and support light/dark color schemes. For a combined picker, use `date: { variant: 'calendar-glass' }` and `time: { variant: 'ios-wheel' }`, or set top-level `variant: 'calendar-glass'` with `timeVariant: 'ios-wheel'`. The input and change events update only after Apply/OK.
+
+On opening, the picker shows the current time in its configured timezone if the input is empty. In the default variant, **Current time** resets the wheel and **Exit** commits. The analog variant uses **Cancel** and **OK**. Both fire `hewarge:timechange` (and `hewarge:change`) after confirmation. The composed date-time picker also fires `hewarge:datetimechange`, whose detail includes `dateTime`, `timeZone`, and a millisecond `timestamp`. Any runtime-supported IANA timezone may be configured by the developer; the UI has no timezone selector. `Asia/Kurdstan` is normalized to `Asia/Baghdad`. Nonexistent wall-clock times during a daylight-saving transition are reported through `validationError` and have a `null` timestamp.
 
 Available helpers include `formatTime({hour, minute, second}, '12' | '24')` and `parseTime(text, '12' | '24')`. Use `appointment.setTimeZone('Asia/Tehran')` to update the composed picker's timezone, and `appointment.destroy()` to clean up both controls.
 
 ## Design goal
 
 The date picker is an embeddable component. It is not a standalone page. A developer attaches it to an existing HTML input; focusing or clicking that input opens a modal date picker.
+
+## Custom and native interfaces
+
+The calendar logic can also be used without the bundled DOM interface. Create one controller per field or UI instance; each controller owns its calendar, value, range and visible month, so different interfaces can coexist on the same page. This API does not access `document`, `window` or an HTML input and can be bridged to a native app or a framework-specific component.
+
+```js
+import { createDatePickerController } from '@hewarge/calendar-core/picker';
+
+const model = createDatePickerController({
+  calendar: 'kurdish',
+  format: 'DD/MM/YYYY',
+  minDate: { year: 2726, month: 1, day: 1 },
+  maxDate: { year: 2726, month: 12, day: 29 }
+});
+
+function render(state) {
+  // Render state.monthLabel, state.weekdays and state.days in your own UI.
+  // Each day includes selected, today and allowed flags.
+  console.log(state.formattedValue, state.gregorianValue, state.days);
+}
+
+render(model.getState());
+const unsubscribe = model.subscribe(({ state }) => render(state));
+
+model.navigate(1);       // next month, if in range
+model.select(16);         // select day 16 in the visible month
+model.setCalendar('jalali');
+model.goToToday();
+model.clear();
+unsubscribe();
+```
+
+The controller API includes `getState()`, `subscribe()`, `setDate()`, `setView()`, `navigate()`, `select()`, `setCalendar()`, `goToToday()`, `clear()`, `isAllowed()` and `canMoveMonth()`. Change notifications contain `{ type, state }`; view-only navigation uses `type: 'view'`, date changes use `type: 'change'`, and clearing uses `type: 'clear'`. `state.gregorianValue` is the canonical Gregorian `YYYY-MM-DD` value, or `null` when cleared.
+
+The existing `createDatePicker(input, options)` remains the default ready-made interface and is unchanged. The controller is the custom/native interface foundation. Once additional visual designs are provided, they can be registered as independent per-instance UI adapters without changing this calendar API.
 
 ## Installation
 
@@ -166,6 +215,45 @@ createDatePicker(appointmentDate, {
   futureMonths: 3
 });
 ```
+
+## Built-in calendar-card interface
+
+Choose the orange calendar-card design from the attached reference with `variant: 'calendar-card'`. The choice belongs to the individual picker instance, so the existing default interface and the card interface can be mixed on a page. In this variant, clicking a day changes the draft selection; the input and `hewarge:change` event update only after **Confirm**.
+
+```js
+const compactCard = createDatePicker(document.querySelector('#date-card'), {
+  calendar: 'gregorian',
+  format: 'MM/DD/YYYY',
+  variant: 'calendar-card'
+});
+
+const existingDesign = createDatePicker(document.querySelector('#date-default'), {
+  calendar: 'kurdish',
+  variant: 'default'
+});
+```
+
+On small screens, `calendar-card` switches to the date wheel, styled to match the orange card design, with a Done action to confirm the draft. Set `mobileMode: 'calendar'` to keep the calendar grid on mobile. The wheel/card styling adapts to light and dark color schemes. `data-variant="calendar-card"` (or `data-ui="calendar-card"`) is also supported by `attachDatePickers()`.
+
+## Built-in glass calendar interface
+
+The third visual variant is `calendar-glass`, based on the dark glass calendar reference. It has a month header with previous/next navigation, Monday-first weekday headings, a purple selected date, and month/year selectors. On mobile it automatically switches to a matching scroll-wheel date selector with a draft selection and Done action. Both desktop and mobile layouts adapt to light and dark themes.
+
+```js
+const glassDate = createDatePicker(document.querySelector('#glass-date'), {
+  calendar: 'gregorian',
+  format: 'MMM YYYY',
+  variant: 'calendar-glass'
+});
+
+const glassDateTime = createDateTimePicker(dateInput, timeInput, {
+  calendar: 'gregorian',
+  date: { variant: 'calendar-glass' },
+  time: { variant: 'ios-wheel', format: '12' }
+});
+```
+
+The `ios-wheel` time interface supports 12/24-hour formatting, optional seconds, AM/PM, keyboard entry, and Cancel/Apply. It can be used on desktop and mobile; `data-time-variant="ios-wheel"` is supported by `attachTimePickers()`.
 
 ## Auto-attach API
 
