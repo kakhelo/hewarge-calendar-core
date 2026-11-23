@@ -14,6 +14,7 @@ Hewarge separates calendar arithmetic from interface code. Use its immutable dat
 - [Quick start](#quick-start)
 - [Supported calendars](#supported-calendars)
 - [Date and time formatting](#date-and-time-formatting)
+- [Display date and time without a picker](#display-date-and-time-without-a-picker)
 - [Date picker](#date-picker)
 - [Time and date-time pickers](#time-and-date-time-pickers)
 - [Time zones and timestamps](#time-zones-and-timestamps)
@@ -144,6 +145,51 @@ Common tokens include:
 | `Z`, `ZZ`, `z`, `zz` | UTC offset, short time-zone name, or IANA identifier |
 
 Wrap literal text in brackets, for example `[Day] D [of] MMMM YYYY`. Parsing validates supported values; formats that omit required fields cannot reconstruct a complete date or time. For full token, preset, and parsing details, see [docs/FORMATTING.md](./docs/FORMATTING.md).
+
+## Display date and time without a picker
+
+Use Hewarge as a display and formatting library without creating a date picker, time picker, input, or modal. Import only the core and formatting APIs you need; do not import `@hewarge/calendar-core/picker` or its CSS. Your application remains in control of the markup, styles, refresh interval, and user interaction.
+
+This example renders a live Kurdish date and the current time in Baghdad:
+
+```html
+<time id="clock" aria-live="off"></time>
+```
+
+```js
+import { timestampToDateTime } from '@hewarge/calendar-core';
+import { formatDate, formatTime } from '@hewarge/calendar-core/formatting';
+
+const output = document.querySelector('#clock');
+const calendar = 'kurdish';
+const locale = 'ku-SO';
+const timeZone = 'Asia/Baghdad';
+
+function renderClock() {
+  const now = timestampToDateTime(Date.now(), { timeZone, calendar });
+  const dateText = formatDate(now.date, 'dddd، D MMMM YYYY', {
+    calendar,
+    locale,
+    numberingSystem: 'latn'
+  });
+  const timeText = formatTime(now, 'HH:mm:ss', {
+    locale,
+    numberingSystem: 'latn',
+    timeZone
+  });
+  output.textContent = `${dateText} · ${timeText}`;
+}
+
+renderClock();
+const timer = setInterval(renderClock, 1000);
+
+// When the view/component is removed:
+clearInterval(timer);
+```
+
+`timestampToDateTime()` converts the current instant into the requested calendar and time zone; `formatDate()` and `formatTime()` produce the two display strings. Change the calendar, locale, numeral system, format patterns, or IANA time zone to suit your interface. For a fixed value, pass a `HewargeDate`, JavaScript `Date`, or date-fields object to `formatDate()`, and time fields or a timestamp to `formatTime()`.
+
+This headless approach works for dashboards, labels, cards, reports, server-side formatting, and custom/native interfaces. Hewarge computes and formats values; your application decides where and how to display them. See [formatting tokens and presets](./docs/FORMATTING.md) and [timestamp/time-zone APIs](./docs/API.md#timestamp-and-time-zone-conversion) for details.
 
 ## Date picker
 
